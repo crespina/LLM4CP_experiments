@@ -7,6 +7,10 @@ from llama_index.core.schema import TextNode
 from llama_index.core import VectorStoreIndex
 from llama_index.postprocessor.colbert_rerank import ColbertRerank
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from sklearn.metrics.pairwise import cosine_similarity
+import seaborn as sns
+import matplotlib.pyplot as plt
+import numpy as np
 
 import pickle
 
@@ -140,9 +144,11 @@ def create_index():
         for question in value.questions :
             node = TextNode(text=question[1], id_=str(counter))
             nodes.append(node)
+            counter+=1
 
     global index
     index = VectorStoreIndex(nodes, embed_model=HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5"))
+
 
 def rerank(query):
     colbert_reranker = ColbertRerank(
@@ -160,6 +166,7 @@ def rerank(query):
     response = query_engine.query(
         query,
     )
+    print("----------------------------")
     for node in response.source_nodes:
         print(node.id_)
         print(node.node.get_content()[:120])
@@ -167,6 +174,52 @@ def rerank(query):
         print("retrieval score: ", node.node.metadata["retrieval_score"])
         print("**********")
     print(response)
+
+def confusion_matrix():
+
+    vectors = index._vector_store._data.embedding_dict
+    num_categories = 5
+    texts_per_category = 5
+
+    # Step 1: Extract the embeddings and group them by category
+    embeddings = np.array(list(vectors.values()))
+
+    # Step 2: Average embeddings by category
+    category_embeddings = []
+    category_labels = []
+    for i in range(num_categories):
+        # Extract embeddings for this category
+        category_embs = embeddings[
+            i * texts_per_category : (i + 1) * texts_per_category
+        ]
+
+        # Average the embeddings for the current category
+        avg_embedding = np.mean(category_embs, axis=0)
+
+        # Store the average embedding and the category label
+        category_embeddings.append(avg_embedding)
+
+    # Convert to NumPy array for cosine similarity
+    for key, value in instances.items():
+        category_labels.append(key)
+    category_embeddings = np.array(category_embeddings)
+
+    # Step 3: Compute the cosine similarity matrix between categories
+    similarity_matrix = cosine_similarity(category_embeddings)
+
+    # Step 4: Plot the confusion matrix using a heatmap
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(
+        similarity_matrix,
+        annot=True,
+        cmap="coolwarm",
+        xticklabels=category_labels,
+        yticklabels=category_labels,
+    )
+    plt.title("Cosine Similarity between Categories")
+    plt.xticks(rotation=45)
+    plt.yticks(rotation=0)
+    plt.show()
 
 
 def save_instances():
@@ -197,11 +250,7 @@ llm = ChatGroq(
 )
 
 load_instances()
-# create_index()
-# rerank("")
-for key, value in instances.items():
-    for question in value.questions:
-        print(question)
-        print("\n")
-        print("----------------")
-        print("\n")
+create_index()
+confusion_matrix()
+
+# rerank("My car trunk has a space of 3 m3, and i would like to take surf plank that would bring me much joy but takes 2 m3, some sand that i would be a little bit happy to have and that takes 0.3 m3")
