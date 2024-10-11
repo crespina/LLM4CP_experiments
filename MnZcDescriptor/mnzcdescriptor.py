@@ -11,8 +11,11 @@ from sklearn.metrics.pairwise import cosine_similarity
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
-
+import os
+import shutil
+import git
 import pickle
+import stat
 
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
 os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
@@ -37,18 +40,48 @@ class TextDescription(BaseModel):
     objective: str = Field(description="The objective of the problem (minimize or maximize what value)")
 
 class Questions(BaseModel):
-  '''Situations or problems that a user could be facing that would be modelled as the given described model '''
-  question1: str = Field(description="A question/scenario that is from a user very skilled in modelling and solving constraint problems")
-  question2: str = Field(description="A question/scenario that is from a user that knows nothing about formal modelling and solving constraint problems")
-  question3: str = Field(description="A question/scenario that is from a young user")
-  question4: str = Field(description="A question/scenario that is very short")
-  question5: str = Field(description="A question/scenario that is very long and specific")
+    """Situations or problems that a user could be facing that would be modelled as the given described model"""
+    question1: str = Field(
+        description="A question/scenario that is from a user very skilled in modelling and solving constraint problems"
+    )
+    question2: str = Field(
+        description="A question/scenario that is from a user that knows nothing about formal modelling and solving constraint problems"
+    )
+    question3: str = Field(description="A question/scenario that is from a young user")
+    question4: str = Field(description="A question/scenario that is very short")
+    question5: str = Field(
+        description="A question/scenario that is very long and specific"
+    )
 
 
-def fetch():
-    ### TODO : automatic retrieving of all .mzn file in https://github.com/MiniZinc/minizinc-examples/tree/master
+def fetch(repo_url, local_repo_dir="MnZcDescriptor/temp_repo", output_dir="MnZcDescriptor/models_mzn"):
+    
+    def handle_remove_readonly(func, path, exc_info):
+        os.chmod(path, stat.S_IWRITE)
+        func(path)
 
-    return
+
+    if os.path.exists(local_repo_dir):
+        shutil.rmtree(local_repo_dir, onerror=handle_remove_readonly)
+    git.Repo.clone_from(repo_url, local_repo_dir)
+
+    
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    
+    mzn_files = []
+    for root, dirs, files in os.walk(local_repo_dir):
+        for file in files:
+            if file.endswith(".mzn"):
+                mzn_files.append(os.path.join(root, file))
+
+    
+    for file_path in mzn_files:
+        shutil.copy(file_path, output_dir)
+
+    
+    shutil.rmtree(local_repo_dir, onerror=handle_remove_readonly)
 
 
 def convert():
@@ -249,8 +282,9 @@ llm = ChatGroq(
     # todo : test different values for parameters
 )
 
-load_instances()
-create_index()
-confusion_matrix()
 
+#fetch("https://github.com/MiniZinc/minizinc-examples.git")
+# load_instances()
+# create_index()
+# confusion_matrix()
 # rerank("My car trunk has a space of 3 m3, and i would like to take surf plank that would bring me much joy but takes 2 m3, some sand that i would be a little bit happy to have and that takes 0.3 m3")
