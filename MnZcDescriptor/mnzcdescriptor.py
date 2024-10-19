@@ -22,12 +22,12 @@ os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
 os.environ["LANGCHAIN_API_KEY"] = "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"
 os.environ["LLAMA_CLOUD_API_KEY"] = "llx-69uKeyDcP4GtxQ9TaJkczA29jOlnzKSvuyu9HKlpuaRoNfx3"
 os.environ["GROQ_API_KEY"] = "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"
-# os.environ["OPENAI_API_KEY"] = ("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")
+# os.environ["OPENAI_API_KEY"] = "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")
 
-class Database:
-
-    def __init__(self, model, text_description=None, questions=None):
-        self.model : str = model
+class CPModel:
+    #one document per piece of information and associate all docuemnts thorugh a tag ('model_name' = 'TSP')
+    def __init__(self, cp_model_source, text_description=None, questions=None):
+        self.cp_model_source = cp_model_source #Document llama idnex
         self.text_description = text_description
         self.questions = questions
 
@@ -35,8 +35,8 @@ class TextDescription(BaseModel):
     '''A description in English of a problem represented by a MiniZinc model'''
     name: str = Field(description="The name of the problem")
     description: str = Field(description="A description of the problem")
-    variables: str = Field(description="A list of all the decision variables in mathematical notation, followed by an explaination of what they are in English")
-    constraints: str = Field(description="A list of all the constraints in mathematical notation only")
+    variables: str = Field(description="All the decision variables in mathematical notation, followed by an explanation of what they are in English")
+    constraints: str = Field(description="All the constraints in mathematical notation only")
     objective: str = Field(description="The objective of the problem (minimize or maximize what value)")
 
 class Questions(BaseModel):
@@ -55,75 +55,94 @@ class Questions(BaseModel):
 
 
 def fetch(repo_url, local_repo_dir="MnZcDescriptor/temp_repo", output_dir="MnZcDescriptor/models_mzn"):
-    
+
     def handle_remove_readonly(func, path, exc_info):
         os.chmod(path, stat.S_IWRITE)
         func(path)
-
 
     if os.path.exists(local_repo_dir):
         shutil.rmtree(local_repo_dir, onerror=handle_remove_readonly)
     git.Repo.clone_from(repo_url, local_repo_dir)
 
-    
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    
     mzn_files = []
     for root, dirs, files in os.walk(local_repo_dir):
         for file in files:
             if file.endswith(".mzn"):
                 mzn_files.append(os.path.join(root, file))
 
-    
     for file_path in mzn_files:
         shutil.copy(file_path, output_dir)
 
-    
     shutil.rmtree(local_repo_dir, onerror=handle_remove_readonly)
 
 
-def convert():
+def convert_mzn_to_txt():
+    """
+    Converts all .mzn files in the specified folder to .txt files.
 
-    folder_path = Path("/models")
+    Args:
+        folder_path (str): The path to the folder containing the .mzn files.
+    """
+
+    for root, dirs, files in os.walk("MnZcDescriptor/models_mzn"):
+        for file in files:
+            if file.endswith(".mzn"):
+
+                with open("MnZcDescriptor/models_mzn/"+file, "r") as mzn_file:
+                    content = mzn_file.read()
+                    txt_file_path = os.path.join(
+                        "MnZcDescriptor/models_mzn", file.replace(".mzn", ".txt")
+                    )
+                # Write the content to the .txt file
+                with open(txt_file_path, "w") as txt_file:
+                    txt_file.write(content)      
+
+    print("Conversion completed: All .mzn files have been converted to .txt.")
+
+
+def convert(instances, folder_name):
+
+    folder_path = Path(folder_name)
 
     for file_path in folder_path.glob("*.txt"):
         file_name = file_path.stem
         with file_path.open('r') as file:
             file_content = file.read()
-            a = Database(model = file_content)
-            instances[file_name] = a
+            cpmodel = CPModel(cp_model_source = file_content)
+            instances[file_name] = cpmodel
 
 
-def create_text_description():
+def create_text_description(llm, instances):
 
     prompt_text_description = ChatPromptTemplate.from_messages(
         [
             (
                 "system",
                 """
-                You are an expert in high-level constraint modelling and solving discrete optimisation problems.
+                You are an expert in high-level constraint modelling and solving discrete optimization problems.
                 In particular, you know Minizinc.
                 You are provided with a Minizinc model that represents a classical problem in constraint programming.
-                Your task is to identify what is the problem modelled and give a complete description of the problem to the user
-                The format of the answer should be without any variation :
+                Your task is to identify what is the problem modelled and give a complete description of the problem to the user.
+                The format of the answer should be without any variation a JSON-like format with the following keys and explanation of what the corresponding values should be:
                     name: The name of the problem
                     description: A description of the problem in English
-                    variables: A list of all the decision variables in mathematical notation, followed by an explaination of what they are in English
-                    constraints: A list of all the constraints in mathematical notation, followed by an explaination of what they are in English
-                    objective:The objective of the problem (minimize or maximize what value)
+                    variables: A string containing the list of all the decision variables in mathematical notation, followed by an explanation of what they are in English
+                    constraints: A string containing the list of all the constraints in mathematical notation, followed by an explanation of what they are in English
+                    objective: The objective of the problem (minimize or maximize what value)
                 """,
             ),
             ("human", "{input}"),
         ]
     )
 
-    structured_llm_text_description = llm.with_structured_output(TextDescription)
+    structured_llm_text_description = llm.with_structured_output(TextDescription, method="json_mode")
 
     for (key, value) in instances.items():
         chain = prompt_text_description | structured_llm_text_description
-        input = value.model
+        input = value.cp_model_source
         aimessage = chain.invoke(
             {
                 "input": input
@@ -132,7 +151,9 @@ def create_text_description():
         value.text_description = aimessage
 
 
-def create_questions():
+def create_questions(llm, instances):
+    # QuestionsAnsweredExtractor llama index
+    #can add own metadata : exemple family (i can even do it as a tree -> hierchal)
 
     prompt_questions = ChatPromptTemplate.from_messages(
         [
@@ -145,9 +166,10 @@ def create_questions():
                 The questions should incorporate real-life constraints, preferences, and priorities that reflect the problem's structure.
                 For example, focus on specific goals the user wants to achieve, the constraints they face, and the trade-offs they might need to consider.
                 The questions should never incorporate the name of the given problem.
+                You can decide to incorporate numeric dummy data into the questions.
 
                 The first question/scenario should be from a user very skilled in modelling and solving constraint problems.
-                The second question/scenario shoud be from a user that knows nothing about formal modelling and solving constraint problems.
+                The second question/scenario should be from a user that knows nothing about formal modelling and solving constraint problems.
                 The third question/scenario should be from a young user.
                 The fourth question/scenario should be very short
                 The fifth question/scenario should be very long and specific.
@@ -169,21 +191,23 @@ def create_questions():
         )
         value.questions = aimessage
 
-def create_index():
+def create_index(instances):
+    #quesry the embedding model directly, no  index
     counter = 0
     nodes = []
 
     for (key, value) in instances.items():
         for question in value.questions :
-            node = TextNode(text=question[1], id_=str(counter))
+            node = TextNode(text=question[1], id_=key+"_"+str(counter),metadata_template=None)
             nodes.append(node)
             counter+=1
 
-    global index
     index = VectorStoreIndex(nodes, embed_model=HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5"))
+    return index
 
+def rerank(query, index, llm):
+    #not really necessary
 
-def rerank(query):
     colbert_reranker = ColbertRerank(
         #params to be modified
         top_n=5,
@@ -208,8 +232,8 @@ def rerank(query):
         print("**********")
     print(response)
 
-def confusion_matrix():
-
+def confusion_matrix(index, instances):
+    # also questions x code, questions x description, question x code+string (join string)
     vectors = index._vector_store._data.embedding_dict
     num_categories = 5
     texts_per_category = 5
@@ -255,36 +279,59 @@ def confusion_matrix():
     plt.show()
 
 
-def save_instances():
+def save_instances(savename, instances):
 
-    save_path = "MnZcDescriptor\models"
+    save_path = "MnZcDescriptor\instances\\" + savename + ".pkl"
     with open(save_path, "wb") as file:
         pickle.dump(instances, file)
 
     print(f"Pickle file saved to {save_path}")
 
-def load_instances() :
 
-    with open("MnZcDescriptor\instances\instances_w_questions.pkl", "rb") as file:
-        global instances 
+def load_instances(savename):
+
+    filename = "MnZcDescriptor\instances\\" + savename + ".pkl"
+
+    with open(filename, "rb") as file:
         instances = pickle.load(file)
 
     print("Instances loaded")
-
-instances = {}
-
-llm = ChatGroq(
-    model="llama-3.1-70b-versatile",
-    temperature=0,
-    max_tokens=None,
-    timeout=None,
-    max_retries=2,
-    # todo : test different values for parameters
-)
+    return instances
 
 
-#fetch("https://github.com/MiniZinc/minizinc-examples.git")
+def instantiate():
+
+    fetch("https://github.com/MiniZinc/minizinc-examples.git")
+    convert_mzn_to_txt()
+
+def pre_process():
+
+    instances = {}
+
+    llm = ChatGroq(
+        model="llama-3.1-70b-versatile",
+        temperature=0,
+        max_tokens=None,
+        timeout=None,
+        max_retries=2,
+    )
+
+    convert(instances, "MnZcDescriptor\models_mzn")
+    create_text_description(llm, instances)
+    create_questions(llm, instances)
+    save_instances("final", instances)
+
+
+# fetch("https://github.com/MiniZinc/minizinc-examples.git")
+# convert_mzn_to_txt()
 # load_instances()
+
+
 # create_index()
 # confusion_matrix()
 # rerank("My car trunk has a space of 3 m3, and i would like to take surf plank that would bring me much joy but takes 2 m3, some sand that i would be a little bit happy to have and that takes 0.3 m3")
+
+pre_process()
+
+instances = load_instances("final")
+print(instances["knapsack"].questions)

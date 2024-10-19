@@ -7,13 +7,13 @@ array[int,1..2] of PERSON: couples;
 set of PERSON: key;
 
 array[TABLE] of var set of PERSON: table;
+array[PERSON] of var TABLE: seat;
+
 
 predicate not_same_table(PERSON:p1, PERSON: p2) =
-          forall(t in TABLE)(not ({p1,p2} subset table[t]));
+                        seat[p1] != seat[p2];
 
-constraint forall(t in TABLE)(card(table[t]) <= S);
-
-constraint forall(p in PERSON)(exists(t in TABLE)(p in table[t]));
+constraint global_cardinality_low_up(seat, [t|t in TABLE], [0|t in TABLE], [S|t in TABLE]);
 
 constraint forall(c in index_set_1of2(couples))
                  (not_same_table(couples[c,1],couples[c,2]));
@@ -21,12 +21,9 @@ constraint forall(c in index_set_1of2(couples))
 constraint forall(p1,p2 in key where p1 < p2)
                  (not_same_table(p1,p2));
 
-var int: obj = sum(c in index_set_1of2(couples))
-                  ( let { var TABLE: tn1 = sum(t in TABLE)(t * bool2int(couples[c,1] in table[t]));
-                          var TABLE: tn2 = sum(t in TABLE)(t * bool2int(couples[c,2] in table[t]));
-                    } in  tn1 + tn2);
+var int: obj = sum(c in index_set_1of2(couples))(seat[couples[c,1]] + seat[couples[c,2]]);
 
-
+constraint forall(t in TABLE, p in PERSON)(p in table[t] <-> seat[p] = t);    
 
 solve minimize obj;
 
