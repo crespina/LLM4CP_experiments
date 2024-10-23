@@ -206,7 +206,11 @@ def create_questions(llm, instances):
 
 def embedding(instances):
 
-    embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
+    for doc in instances.values() :
+        if 'embedding_vector' in doc.metadata.keys():
+            del doc.metadata['embedding_vector']
+
+    embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-base-en-v1.5")
     documents: Sequence[Document] = [content for content in instances.values()]
 
     Settings.chunk_size = 2048
@@ -216,7 +220,7 @@ def embedding(instances):
     embeddings = np.array(list(vectors.values()))
     for doc, vector in zip(instances.values(), embeddings):
         doc.metadata["embedding_vector"] = vector
-    
+
     return index
 
 
@@ -279,10 +283,10 @@ def pre_process(folder_name, instance_name):
 # instances = load_instances("final")
 # print(instances["knapsack"].questions)
 
-pre_process("MnZcDescriptor\\models_mzn", "llama32_90b")
-instances = util.load_instances("llama32_90b")
+# pre_process("MnZcDescriptor\\models_mzn", "llama32_90b")
+instances = util.load_instances("llama32_90b_both_small_embedding")
 embedding(instances)
-util.save_instances("qwen_text_32_90b_quest", instances)
+util.save_instances("llama32_90b_both_base_embedding", instances)
 
-print(len(str(instances["array_quest"].metadata)))
+print(instances["knapsack"].metadata["embedding_vector"])
 # print(instances["knapsack"].metadata["embedding_vector"])
