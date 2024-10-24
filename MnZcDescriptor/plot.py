@@ -1,22 +1,58 @@
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from pydantic import BaseModel, Field
 from sklearn.decomposition import PCA
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
 from scipy.cluster.hierarchy import dendrogram, linkage
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
+import util
+
+
+### TODO : get rid of that by modifying the pickle loader
+class TextDescription(BaseModel):
+    """A description in English of a problem represented by a MiniZinc model"""
+
+    name: str = Field(description="The name of the problem")
+    description: str = Field(description="A description of the problem")
+    variables: str = Field(
+        description="All the decision variables in mathematical notation, followed by an explanation of what they are in English"
+    )
+    constraints: str = Field(
+        description="All the constraints in mathematical notation only"
+    )
+    objective: str = Field(
+        description="The objective of the problem (minimize or maximize what value)"
+    )
+
+
+class Questions(BaseModel):
+    """Situations or problems that a user could be facing that would be modelled as the given described model"""
+
+    question1: str = Field(
+        description="A question/scenario that is from a user very skilled in modelling and solving constraint problems"
+    )
+    question2: str = Field(
+        description="A question/scenario that is from a user that knows nothing about formal modelling and solving constraint problems"
+    )
+    question3: str = Field(description="A question/scenario that is from a young user")
+    question4: str = Field(description="A question/scenario that is very short")
+    question5: str = Field(
+        description="A question/scenario that is very long and specific"
+    )
 
 
 def cosine_confusion_matrix(
-    sentences, model_name="BAAI/bge-small-en-v1.5", labels=None, save_name = None
+    save_name, sentences=None, embedding_vectors = {}, model_name="BAAI/bge-small-en-v1.5", labels=None, heatmap = False
 ):
-    
-    # first compute the embedding vectors of the sentences
-    embedding_vectors = {}
-    embed_model = HuggingFaceEmbedding(model_name=model_name)
-    for sentence in sentences:
-        embedding_vectors[sentence] = embed_model.get_text_embedding(sentence)
+
+    # if absent, first compute the embedding vectors of the sentences
+    if not embedding_vectors : 
+        embed_model = HuggingFaceEmbedding(model_name=model_name)
+        for sentence in sentences:
+            embedding_vectors[sentence] = embed_model.get_text_embedding(sentence)
 
     # then compute the cosine similarity
     if labels == None:
@@ -27,41 +63,68 @@ def cosine_confusion_matrix(
     similarity_matrix = cosine_similarity(embeddings)
 
     # plot
-
-    plt.figure(figsize=(10, 8))
-    sns.heatmap(
-        similarity_matrix,
-        annot=True,
-        cmap="coolwarm",
-        xticklabels=labels,
-        yticklabels=labels,
-    )
-    plt.title("Cosine Similarity Matrix")
-    plt.xticks(rotation=90)
-    plt.yticks(rotation=0)
-    plt.show()
-    if save_name !=None :
-        plt.savefig(
-            "MnZcDescriptor\\figures\\" + save_name + ".pdf",
-            format="pdf",
-            bbox_inches="tight",
+    if (not heatmap) :
+        plt.figure(figsize=(10, 8))
+        sns.heatmap(
+            similarity_matrix,
+            annot=True,
+            cmap="coolwarm",
+            xticklabels=labels,
+            yticklabels=labels,
         )
+        plt.title("Cosine Similarity Matrix")
+        plt.xticks(rotation=90)
+        plt.yticks(rotation=0)
+
+        if save_name !=None :
+            plt.savefig(
+                "MnZcDescriptor\\figures\\" + save_name + ".pdf",
+                format="pdf",
+                bbox_inches="tight",
+            )
+        plt.show()
+
+    elif (heatmap):
+
+        plt.figure(figsize=(12, 10))  # Adjust figure size
+        sns.heatmap(
+            similarity_matrix, cmap="coolwarm", xticklabels=False, yticklabels=False
+        )
+        if save_name !=None :
+            plt.savefig(
+                "MnZcDescriptor\\figures\\" + save_name + ".pdf",
+                format="pdf",
+            )
+        plt.show()
 
 
 def KMeans_clustering_plot(
-    sentences, n_clusters=3, model_name="BAAI/bge-small-en-v1.5", labels=None, save_name = None
+    save_name, best_n = None, sentences = None, embedding_vectors = {}, model_name="BAAI/bge-small-en-v1.5", labels=None
 ):
 
-    # first compute the embedding vectors of the sentences
-    embedding_vectors = {}
-    embed_model = HuggingFaceEmbedding(model_name=model_name)
-    for sentence in sentences:
-        embedding_vectors[sentence] = embed_model.get_text_embedding(sentence)
+    # if absent, first compute the embedding vectors of the sentences
+    if (not embedding_vectors):
+        embed_model = HuggingFaceEmbedding(model_name=model_name)
+        for sentence in sentences:
+            embedding_vectors[sentence] = embed_model.get_text_embedding(sentence)
 
     embeddings = np.array(list(embedding_vectors.values()))
 
+    # Silhouette analysis to find the best nb of clusters
+    max_score = -2
+
+    if (not best_n):
+        best_n = -1
+
+        for n_cluster in range (2,50,1):
+            kmeans = KMeans(n_clusters=n_cluster, random_state=19851900)
+            score = silhouette_score(embeddings, kmeans.fit_predict(embeddings))
+            if (score > max_score):
+                max_score = score
+                best_n = n_cluster
+
     # K-Means Clustering
-    kmeans = KMeans(n_clusters=n_clusters, random_state=19851900)
+    kmeans = KMeans(n_clusters=best_n, random_state=19851900)
     cluster_labels = kmeans.fit_predict(embeddings)
 
     # Reduce the dimensionality (for visualization)
@@ -90,8 +153,7 @@ def KMeans_clustering_plot(
             ha="right",
         )
 
-    plt.title(f"K-Means Clustering with {n_clusters} Clusters")
-    plt.show()
+    plt.title(f"K-Means Clustering with {best_n} Clusters")
 
     if save_name != None:
         plt.savefig(
@@ -100,16 +162,17 @@ def KMeans_clustering_plot(
             bbox_inches="tight",
         )
 
+    plt.show()
 
 def hierarchical_clustering_plot(
-    sentences, model_name="BAAI/bge-small-en-v1.5", labels=None, save_name = None
+    save_name, sentences = None, embedding_vectors={}, model_name="BAAI/bge-small-en-v1.5", labels=None
 ):
 
-    # first compute the embedding vectors of the sentences
-    embedding_vectors = {}
-    embed_model = HuggingFaceEmbedding(model_name=model_name)
-    for sentence in sentences:
-        embedding_vectors[sentence] = embed_model.get_text_embedding(sentence)
+    # if absent, first compute the embedding vectors of the sentences
+    if (not embedding_vectors):
+        embed_model = HuggingFaceEmbedding(model_name=model_name)
+        for sentence in sentences:
+            embedding_vectors[sentence] = embed_model.get_text_embedding(sentence)
 
     embeddings = np.array(list(embedding_vectors.values()))
 
@@ -124,7 +187,6 @@ def hierarchical_clustering_plot(
     plt.title("Hierarchical Clustering Dendrogram")
     plt.xlabel("Sentences")
     plt.ylabel("Distance")
-    plt.show()
 
     if save_name != None:
         plt.savefig(
@@ -133,51 +195,18 @@ def hierarchical_clustering_plot(
             bbox_inches="tight",
         )
 
-
-"""
-def confusion_matrix(index, instances):
-    # also questions x code, questions x description, question x code+string (join string)
-    vectors = index._vector_store._data.embedding_dict
-    num_categories = 5
-    texts_per_category = 5
-
-    # Step 1: Extract the embeddings and group them by category
-    embeddings = np.array(list(vectors.values()))
-
-    # Step 2: Average embeddings by category
-    category_embeddings = []
-    category_labels = []
-    for i in range(num_categories):
-        # Extract embeddings for this category
-        category_embs = embeddings[
-            i * texts_per_category : (i + 1) * texts_per_category
-        ]
-
-        # Average the embeddings for the current category
-        avg_embedding = np.mean(category_embs, axis=0)
-
-        # Store the average embedding and the category label
-        category_embeddings.append(avg_embedding)
-
-    # Convert to NumPy array for cosine similarity
-    for key, value in instances.items():
-        category_labels.append(key)
-    category_embeddings = np.array(category_embeddings)
-
-    # Step 3: Compute the cosine similarity matrix between categories
-    similarity_matrix = cosine_similarity(category_embeddings)
-
-    # Step 4: Plot the confusion matrix using a heatmap
-    plt.figure(figsize=(8, 6))
-    sns.heatmap(
-        similarity_matrix,
-        annot=True,
-        cmap="coolwarm",
-        xticklabels=category_labels,
-        yticklabels=category_labels,
-    )
-    plt.title("Cosine Similarity between Categories")
-    plt.xticks(rotation=45)
-    plt.yticks(rotation=0)
     plt.show()
-"""
+
+instances = util.load_instances("qwen_text_32_90b_quest")
+labels = []
+embedding_vectors = {}
+for key, value in instances.items():
+    labels.append(key)
+    embedding_vectors[key] = value.metadata["embedding_vector"]
+
+
+#cosine_confusion_matrix(save_name="qwen_text_32_90b_quest_cosine_sim",labels=labels,embedding_vectors=embedding_vectors)
+
+KMeans_clustering_plot("qwen_text_32_90b_quest_kmeans" , embedding_vectors=embedding_vectors, labels=labels)
+
+#hierarchical_clustering_plot("qwen_text_32_90b_quest_hierarchical",embedding_vectors=embedding_vectors,labels=labels)
