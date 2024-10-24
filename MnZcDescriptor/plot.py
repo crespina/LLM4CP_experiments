@@ -45,7 +45,7 @@ class Questions(BaseModel):
 
 
 def cosine_confusion_matrix(
-    save_name, sentences=None, embedding_vectors = {}, model_name="BAAI/bge-small-en-v1.5", labels=None, heatmap = False
+    save_name, sentences=None, embedding_vectors = {}, model_name="BAAI/bge-base-en-v1.5", labels=None, heatmap = False
 ):
 
     # if absent, first compute the embedding vectors of the sentences
@@ -88,8 +88,12 @@ def cosine_confusion_matrix(
 
         plt.figure(figsize=(12, 10))  # Adjust figure size
         sns.heatmap(
-            similarity_matrix, cmap="coolwarm", xticklabels=False, yticklabels=False
+            similarity_matrix,
+            cmap="coolwarm",
+            xticklabels=labels,
+            yticklabels=labels,
         )
+        plt.title("Cosine Similarity Matrix")
         if save_name !=None :
             plt.savefig(
                 "MnZcDescriptor\\figures\\" + save_name + ".pdf",
@@ -99,7 +103,7 @@ def cosine_confusion_matrix(
 
 
 def KMeans_clustering_plot(
-    save_name, best_n = None, sentences = None, embedding_vectors = {}, model_name="BAAI/bge-small-en-v1.5", labels=None
+    save_name, best_n = None, sentences = None, embedding_vectors = {}, model_name="BAAI/bge-base-en-v1.5", labels=None
 ):
 
     # if absent, first compute the embedding vectors of the sentences
@@ -116,7 +120,7 @@ def KMeans_clustering_plot(
     if (not best_n):
         best_n = -1
 
-        for n_cluster in range (2,50,1):
+        for n_cluster in range (2,24,1):
             kmeans = KMeans(n_clusters=n_cluster, random_state=19851900)
             score = silhouette_score(embeddings, kmeans.fit_predict(embeddings))
             if (score > max_score):
@@ -165,7 +169,7 @@ def KMeans_clustering_plot(
     plt.show()
 
 def hierarchical_clustering_plot(
-    save_name, sentences = None, embedding_vectors={}, model_name="BAAI/bge-small-en-v1.5", labels=None
+    save_name, sentences = None, embedding_vectors={}, model_name="BAAI/bge-base-en-v1.5", labels=None
 ):
 
     # if absent, first compute the embedding vectors of the sentences
@@ -197,16 +201,24 @@ def hierarchical_clustering_plot(
 
     plt.show()
 
-instances = util.load_instances("qwen_text_32_90b_quest")
+instances = util.load_instances("llama32_90b_base_test")
 labels = []
-embedding_vectors = {}
+sentences = []
 for key, value in instances.items():
-    labels.append(key)
-    embedding_vectors[key] = value.metadata["embedding_vector"]
+    labels.append(key+" q1")
+    labels.append(key + " q2")
+    labels.append(key + " q3")
+    labels.append(key + " q4")
+    labels.append(key + " q5")
+    sentences.append(value.metadata["question1"])
+    sentences.append(value.metadata["question2"])
+    sentences.append(value.metadata["question3"])
+    sentences.append(value.metadata["question4"])
+    sentences.append(value.metadata["question5"])
 
 
-#cosine_confusion_matrix(save_name="qwen_text_32_90b_quest_cosine_sim",labels=labels,embedding_vectors=embedding_vectors)
+cosine_confusion_matrix(save_name="llama32_90b_base_test_cosine_sim",labels=labels,sentences=sentences, heatmap=True)
 
-KMeans_clustering_plot("qwen_text_32_90b_quest_kmeans" , embedding_vectors=embedding_vectors, labels=labels)
+#KMeans_clustering_plot("llama32_90b_base_test_kmeans", best_n=5 ,sentences=sentences, labels=labels)
 
-#hierarchical_clustering_plot("qwen_text_32_90b_quest_hierarchical",embedding_vectors=embedding_vectors,labels=labels)
+#hierarchical_clustering_plot("llama32_90b_base_test_hierarchical",sentences=sentences,labels=labels)

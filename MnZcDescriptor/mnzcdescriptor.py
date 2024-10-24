@@ -210,7 +210,7 @@ def embedding(instances):
         if 'embedding_vector' in doc.metadata.keys():
             del doc.metadata['embedding_vector']
 
-    embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-base-en-v1.5")
+    embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
     documents: Sequence[Document] = [content for content in instances.values()]
 
     Settings.chunk_size = 2048
@@ -247,12 +247,11 @@ def pre_process(folder_name, instance_name):
 
     # curl -fsSL https://ollama.com/install.sh |sh
     # ollama serve & ollama pull qwen2.5-coder
-    llm_code = ChatGroq(
-        model="llama-3.2-90b-text-preview",
+    llm_code = Ollama(
+        model="qwen2.5-coder",
         temperature=0,
-        max_tokens=None,
-        timeout=None,
-        max_retries=2,
+        request_timeout=600.0
+        
     )
 
     llm_questions = ChatGroq(
@@ -283,10 +282,10 @@ def pre_process(folder_name, instance_name):
 # instances = load_instances("final")
 # print(instances["knapsack"].questions)
 
-# pre_process("MnZcDescriptor\\models_mzn", "llama32_90b")
-instances = util.load_instances("llama32_90b_both_small_embedding")
+pre_process("MnZcDescriptor\\test_models", "qwen25_small_test")
+instances = util.load_instances("qwen25_small_test")
 embedding(instances)
-util.save_instances("llama32_90b_both_base_embedding", instances)
+util.save_instances("qwen25_small_test", instances)
 
 print(instances["knapsack"].metadata["embedding_vector"])
 # print(instances["knapsack"].metadata["embedding_vector"])
