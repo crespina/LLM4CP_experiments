@@ -68,7 +68,7 @@ def cosine_confusion_matrix(
         sns.heatmap(
             similarity_matrix,
             annot=True,
-            cmap="coolwarm",
+            cmap="viridis",
             xticklabels=labels,
             yticklabels=labels,
         )
@@ -222,3 +222,6 @@ cosine_confusion_matrix(save_name="llama32_90b_base_test_cosine_sim",labels=labe
 #KMeans_clustering_plot("llama32_90b_base_test_kmeans", best_n=5 ,sentences=sentences, labels=labels)
 
 #hierarchical_clustering_plot("llama32_90b_base_test_hierarchical",sentences=sentences,labels=labels)
+
+
+#sspectral clustering -> eigenvalues 
