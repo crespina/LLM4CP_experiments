@@ -279,8 +279,8 @@ def pre_process(folder_name, instance_name):
 
 # pre_process()
 
-# instances = load_instances("final")
-# print(instances["knapsack"].questions)
+# model_checkpoints = load_instances("final")
+# print(model_checkpoints["knapsack"].questions)
 
 pre_process("MnZcDescriptor\\test_models", "qwen25_small_test")
 instances = util.load_instances("qwen25_small_test")
@@ -288,4 +288,4 @@ embedding(instances)
 util.save_instances("qwen25_small_test", instances)
 
 print(instances["knapsack"].metadata["embedding_vector"])
-# print(instances["knapsack"].metadata["embedding_vector"])
+# print(model_checkpoints["knapsack"].metadata["embedding_vector"])

@@ -10,7 +10,7 @@ import stat
 def fetch(
     repo_url,
     local_repo_dir="MnZcDescriptor/temp_repo",
-    output_dir="MnZcDescriptor/models_mzn",
+    output_dir="MnZcDescriptor/mzn",
 ):
 
     def handle_remove_readonly(func, path, exc_info):
@@ -44,14 +44,14 @@ def convert_mzn_to_txt():
         folder_path (str): The path to the folder containing the .mzn files.
     """
 
-    for root, dirs, files in os.walk("MnZcDescriptor/models_mzn"):
+    for root, dirs, files in os.walk("MnZcDescriptor/mzn"):
         for file in files:
             if file.endswith(".mzn"):
 
-                with open("MnZcDescriptor/models_mzn/" + file, "r") as mzn_file:
+                with open("MnZcDescriptor/mzn/" + file, "r") as mzn_file:
                     content = mzn_file.read()
                     txt_file_path = os.path.join(
-                        "MnZcDescriptor/models_mzn", file.replace(".mzn", ".txt")
+                        "MnZcDescriptor/mzn", file.replace(".mzn", ".txt")
                     )
                 # Write the content to the .txt file
                 with open(txt_file_path, "w") as txt_file:
