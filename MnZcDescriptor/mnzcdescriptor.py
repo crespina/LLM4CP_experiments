@@ -33,17 +33,11 @@ class TextDescription(BaseModel):
 
 class Questions(BaseModel):
     """Situations or problems that a user could be facing that would be modelled as the given described model"""
-    question1: str = Field(
-        description="A question/scenario that is from a user very skilled in modelling and solving constraint problems"
-    )
-    question2: str = Field(
-        description="A question/scenario that is from a user that knows nothing about formal modelling and solving constraint problems"
-    )
+    question1: str = Field(description="A question/scenario that is from a user very skilled in modelling and solving constraint problems")
+    question2: str = Field(description="A question/scenario that is from a user that knows nothing about formal modelling and solving constraint problems")
     question3: str = Field(description="A question/scenario that is from a young user")
     question4: str = Field(description="A question/scenario that is very short")
-    question5: str = Field(
-        description="A question/scenario that is very long and specific"
-    )
+    question5: str = Field(description="A question/scenario that is very long and specific")
 
 
 def convert_txt_to_Document(instances, folder_name):
@@ -282,10 +276,10 @@ def pre_process(folder_name, instance_name):
 # model_checkpoints = load_instances("final")
 # print(model_checkpoints["knapsack"].questions)
 
-pre_process("MnZcDescriptor\\test_models", "qwen25_small_test")
-instances = util.load_instances("qwen25_small_test")
-embedding(instances)
-util.save_instances("qwen25_small_test", instances)
+#pre_process("MnZcDescriptor\\test_models", "qwen25_small_test")
+instances = util.load_instances("MnZcDescriptor\data\model_checkpoints\llama32_90b_both_base_embedding")
+#embedding(instances)
+#util.save_instances("qwen25_small_test", instances)
 
-print(instances["knapsack"].metadata["embedding_vector"])
+print(instances["flattening10"].metadata["text_description"])
 # print(model_checkpoints["knapsack"].metadata["embedding_vector"])

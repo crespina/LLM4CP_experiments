@@ -5,6 +5,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 from scipy.cluster.hierarchy import dendrogram, linkage
+from sklearn.cluster import SpectralClustering
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
@@ -168,6 +169,88 @@ def KMeans_clustering_plot(
 
     plt.show()
 
+
+
+def SpectralClustering_plot(
+    save_name,
+    best_n=None,
+    sentences=None,
+    embedding_vectors={},
+    model_name="BAAI/bge-base-en-v1.5",
+    labels=None,
+):
+
+    # if absent, first compute the embedding vectors of the sentences
+    if not embedding_vectors:
+        embed_model = HuggingFaceEmbedding(model_name=model_name)
+        for sentence in sentences:
+            embedding_vectors[sentence] = embed_model.get_text_embedding(sentence)
+
+    embeddings = np.array(list(embedding_vectors.values()))
+
+    # Silhouette analysis to find the best number of clusters
+    max_score = -1
+
+    if not best_n:
+        best_n = -1
+        for n_cluster in range(2, 25):
+            spectral = SpectralClustering(
+                n_clusters=n_cluster,
+                affinity="nearest_neighbors",
+                random_state=19851900,
+            )
+            labels = spectral.fit_predict(embeddings)
+            score = silhouette_score(embeddings, labels)
+            if score > max_score:
+                max_score = score
+                best_n = n_cluster
+
+    # Spectral Clustering
+    spectral = SpectralClustering(
+        n_clusters=best_n, affinity="nearest_neighbors", random_state=19851900
+    )
+    cluster_labels = spectral.fit_predict(embeddings)
+
+    # Reduce the dimensionality (for visualization)
+    pca = PCA(n_components=2)
+    reduced_embeddings = pca.fit_transform(embeddings)
+
+    # Plot
+    plt.figure(figsize=(10, 8))
+    sns.scatterplot(
+        x=reduced_embeddings[:, 0],
+        y=reduced_embeddings[:, 1],
+        hue=cluster_labels,
+        palette="viridis",
+        s=100,
+    )
+
+    # Use labels if provided; otherwise, use sentences as labels
+    if labels is None:
+        labels = sentences
+
+    for i, label in enumerate(labels):
+        plt.text(
+            reduced_embeddings[i, 0],
+            reduced_embeddings[i, 1],
+            label,
+            fontsize=9,
+            ha="right",
+        )
+
+    plt.title(f"Spectral Clustering with {best_n} Clusters")
+
+    # Save the figure if a filename is provided
+    if save_name is not None:
+        plt.savefig(
+            'MnZcDescriptor\\_results\\figures\\llama32_90b_base_test\\whole_doc' + save_name + ".pdf",
+            format="pdf",
+            bbox_inches="tight",
+        )
+
+    plt.show()
+
+
 def hierarchical_clustering_plot(
     save_name, sentences = None, embedding_vectors={}, model_name="BAAI/bge-base-en-v1.5", labels=None
 ):
@@ -201,27 +284,27 @@ def hierarchical_clustering_plot(
 
     plt.show()
 
-instances = util.load_instances("llama32_90b_base_test")
+instances = util.load_instances(
+    "MnZcDescriptor\data\model_checkpoints\llama32_90b_both_base_embedding.pkl"
+)
 labels = []
 sentences = []
+embedding_dict = {}
 for key, value in instances.items():
-    labels.append(key+" q1")
-    labels.append(key + " q2")
-    labels.append(key + " q3")
-    labels.append(key + " q4")
-    labels.append(key + " q5")
-    sentences.append(value.metadata["question1"])
-    sentences.append(value.metadata["question2"])
-    sentences.append(value.metadata["question3"])
-    sentences.append(value.metadata["question4"])
-    sentences.append(value.metadata["question5"])
+    labels.append(key)
+    embedding_dict[key] = value.metadata["embedding_vector"]
 
 
-cosine_confusion_matrix(save_name="llama32_90b_base_test_cosine_sim",labels=labels,sentences=sentences, heatmap=True)
+#
+# cosine_confusion_matrix(save_name="llama32_90b_base_test_cosine_sim",labels=labels,sentences=sentences, heatmap=True)
 
-#KMeans_clustering_plot("llama32_90b_base_test_kmeans", best_n=5 ,sentences=sentences, labels=labels)
+# KMeans_clustering_plot("llama32_90b_base_test_kmeans", best_n=5 ,sentences=sentences, labels=labels)
 
-#hierarchical_clustering_plot("llama32_90b_base_test_hierarchical",sentences=sentences,labels=labels)
+SpectralClustering_plot(
+    "llama32_90b_base_test_spectral", embedding_vectors=embedding_dict, labels=labels, best_n=5
+)
+
+# hierarchical_clustering_plot("llama32_90b_base_test_hierarchical",sentences=sentences,labels=labels)
 
 
-#sspectral clustering -> eigenvalues 
+# sspectral clustering -> eigenvalues
