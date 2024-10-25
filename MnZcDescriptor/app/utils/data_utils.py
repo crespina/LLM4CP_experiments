@@ -5,10 +5,8 @@ from tqdm import tqdm
 
 
 def convert_mzn_to_txt(mzn_path, txt_path):
-    # Walk through every directory and subdirectory in the input directory
     for dir_path, _, filenames in os.walk(mzn_path):
         for filename in tqdm(filenames, desc="Converting .mzn to .txt"):
-            # Process only .mzn files
             if filename.endswith(".mzn"):
                 mzn_file_path = os.path.join(dir_path, filename)
                 with open(mzn_file_path, 'r') as mzn_file:

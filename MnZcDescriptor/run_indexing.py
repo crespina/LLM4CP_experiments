@@ -1,4 +1,4 @@
-from MnZcDescriptor.app.data_processing.model_descriptor import Storage
+from MnZcDescriptor.app.data_processing.indexing import Storage
 from MnZcDescriptor.configuration import config_parser
 
 if __name__ == "__main__":
