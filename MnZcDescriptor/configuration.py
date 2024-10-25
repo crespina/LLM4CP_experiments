@@ -1,4 +1,7 @@
 """
+Augustin CRESPIN
+augustin.crespin@student.uclouvain.be | crespin.augustin@gmail.com
+
 Ioannis KOSTIS
 ioannis.kostis@uclouvain.be | ioannis.aris.kostis@gmail.com
 
