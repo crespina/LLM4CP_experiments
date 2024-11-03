@@ -18,17 +18,17 @@ def config_parser():
                         help='config file path')
     parser.add_argument("--keys", is_config_file=True, required=False,
                         help='Path to the API keys file.',
-                        default='./app/assets/.api_keys/keys.txt')
+                        default='MnZcDescriptor/app/assets/.api_keys/keys.txt')
 
     # I/O params
     parser.add_argument('--mzn_path', type=str,
-                        default="data/input/mzn",
+                        default="MnZcDescriptor/data/input/mzn",
                         help='.mzn directory input path.')
     parser.add_argument('--txt_path', type=str,
-                        default="data/input/txt",
+                        default="MnZcDescriptor/data/input/txt",
                         help='.txt directory input path.')
     parser.add_argument('--storage_dir', type=str,
-                        default='./data/vector_dbs/test_db',
+                        default='MnZcDescriptor/data/vector_dbs/leave_one_out_db',
                         help='Vector DB directory path.')
 
     # API Keys

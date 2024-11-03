@@ -1,7 +1,7 @@
 import os
 import warnings
 
-from MnZcDescriptor.app.inference.inference import Inference
+from app.inference.inference import Inference
 from configuration import config_parser
 from llama_index.core.response.pprint_utils import pprint_response
 

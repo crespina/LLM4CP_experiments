@@ -170,7 +170,6 @@ def KMeans_clustering_plot(
     plt.show()
 
 
-
 def SpectralClustering_plot(
     save_name,
     best_n=None,
@@ -277,12 +276,13 @@ def hierarchical_clustering_plot(
 
     if save_name != None:
         plt.savefig(
-            "MnZcDescriptor\\figures\\" + save_name + ".pdf",
+            "_results\\figures\\" + save_name + ".pdf",
             format="pdf",
             bbox_inches="tight",
         )
 
     plt.show()
+
 
 instances = util.load_instances(
     "MnZcDescriptor\data\model_checkpoints\llama32_90b_both_base_embedding.pkl"
@@ -295,16 +295,37 @@ for key, value in instances.items():
     embedding_dict[key] = value.metadata["embedding_vector"]
 
 
-#
+def barplot_families():
+
+    # Data
+    labels = ["First", "Second", "Third", "Fourth", "Fifth", "Incorrect"]
+    values = [26, 13, 9, 7, 3, 37]
+
+    # Plotting
+    plt.figure(figsize=(8, 6))
+    plt.bar(labels, values, color=["green", "green", "green", "green", "green", "red"])
+    plt.xlabel("Propositions")
+    plt.ylabel("Counts")
+    plt.title("Identification of the problem : leave last question")
+    plt.savefig(
+        "_results\\figures\leave_one_out\\first.pdf",
+        format="pdf",
+        bbox_inches="tight",
+    )
+    plt.show()
+
+# barplot_families()
 # cosine_confusion_matrix(save_name="llama32_90b_base_test_cosine_sim",labels=labels,sentences=sentences, heatmap=True)
 
 # KMeans_clustering_plot("llama32_90b_base_test_kmeans", best_n=5 ,sentences=sentences, labels=labels)
 
-SpectralClustering_plot(
-    "llama32_90b_base_test_spectral", embedding_vectors=embedding_dict, labels=labels, best_n=5
-)
+# SpectralClustering_plot("llama32_90b_base_test_spectral", embedding_vectors=embedding_dict, labels=labels, best_n=5)
 
-# hierarchical_clustering_plot("llama32_90b_base_test_hierarchical",sentences=sentences,labels=labels)
+hierarchical_clustering_plot(
+    "llama32_90b_both_base\llama32_90b_both_base_embedding_hierarchical_larger.pdf",
+    embedding_vectors=embedding_dict,
+    labels=labels,
+)
 
 
 # sspectral clustering -> eigenvalues
