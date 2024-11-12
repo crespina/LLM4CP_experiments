@@ -28,7 +28,7 @@ def config_parser():
                         default="MnZcDescriptor/data/input/txt",
                         help='.txt directory input path.')
     parser.add_argument('--storage_dir', type=str,
-                        default='MnZcDescriptor/data/vector_dbs/leave_one_out_db',
+                        default='MnZcDescriptor/data/vector_dbs/test_db',
                         help='Vector DB directory path.')
 
     # API Keys
