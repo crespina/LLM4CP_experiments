@@ -10,7 +10,7 @@ from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.llms.groq import Groq
 from tqdm import tqdm
 
-from MnZcDescriptor.app.utils.data_utils import get_response_schema
+from MnZcDescriptor.app.utils.data_utils import get_response_schema, problem_family
 
 
 class Storage:
@@ -91,7 +91,7 @@ class Storage:
                     cp_model = Document(
                         text=text_description.text,
                         metadata={
-                            "problem_family": "placeholder",  # TODO: Add algorithm/problem group
+                            "problem_family": problem_family(os.path.splitext(filename)[0]),
                             "model_name": os.path.splitext(filename)[0],  # TODO: Drop this
                             "source_code": file_content  # TODO: If this doesn't contribute, drop it.
                         },
