@@ -1,8 +1,10 @@
+import time
+
 import gradio as gr
 from llama_parse import LlamaParse
-from app.inference.inference import Inference
-from configuration import config_parser
-import time
+
+from MnZcDescriptor.app.inference.inference import Inference
+
 
 # inspired by https://www.gradio.app/guides/creating-a-custom-chatbot-with-blocks
 
@@ -15,40 +17,48 @@ class GUI:
         self.history = []
 
     def parse_file(self, path):
-
+        # FIXME: Didn't work, need to look into it.
         documents = self.parser.load_data(path)
         print("finished parsing")
         parsed_doc = ""
-        for doc in documents :
+        for doc in documents:
             parsed_doc += doc.text
             parsed_doc += "\n"
         return parsed_doc
 
-    def split_message(self, input_str):
+    """
+    Made the following two methods static, as they don't need to access any instance variables.
+    """
+
+    @staticmethod
+    def split_message(input_str):
         parts = input_str.split("||")
         message = parts[1].strip()
         path = parts[3].strip()
         return message, path
 
-    def print_like_dislike(self, x: gr.LikeData):
+    @staticmethod
+    def print_like_dislike(x: gr.LikeData):
         # TODO : do something with the like/dislike infos
         print(x.index, x.value, x.liked)
 
     def add_message(self, message):
-        if (message["files"] is not None and message["text"] != ''):
-            for x in message["files"] :
-                self.history.append({"role": "user", "content": "message||"+message["text"] + "||path||" + x})
+        if message["files"] is not None and message["text"] != '':
+            for x in message["files"]:
+                self.history.append({"role": "user", "content": "message||" + message["text"] + "||path||" + x})
                 return self.history, gr.MultimodalTextbox(value=None, interactive=False)
 
         for x in message["files"]:
             self.history.append({"role": "user", "content": x})
         if message["text"] != '':
-            self.history.append({"role": "user", "content": message["text"]} )
+            self.history.append({"role": "user", "content": message["text"]})
         return self.history, gr.MultimodalTextbox(value=None, interactive=False)
 
-    def bot(self, chatbot):
+    def bot(self, question):
+        """
+        Removed the `chatbot` parameter from the method signature, as it is not used.
+        """
 
-        # TODO : sanitize input ?
         # Input
         query = self.history[-1]["content"]
 
@@ -57,17 +67,18 @@ class GUI:
             if query.startswith("message||"):
                 message, path = self.split_message(query)
                 query = (
-                    "here is the user's question"
-                    + "\n"
-                    + message
-                    + "\n"
-                    + "and here is the document"
-                    + "\n"
-                    + self.parse_file(path)
+                        "here is the user's question"
+                        + "\n"
+                        + message
+                        + "\n"
+                        + "and here is the document"
+                        + "\n"
+                        + self.parse_file(path)
                 )
 
-            else : 
+            else:
                 query = self.parse_file(query)
+
 
         # Output
         response = self.agent.query_llm(question=query)
@@ -79,7 +90,7 @@ class GUI:
             name = source_node.metadata["model_name"]
             # name = source_node.metadata["problem_family"]
             # TODO : also print the source code as an option
-            source_code = source_node.metadata["source_code"] 
+            source_code = source_node.metadata["source_code"]
 
             answer += str(name) + " with a score of " + str(score) + "\n"
 
@@ -101,7 +112,7 @@ class GUI:
                 file_count="multiple",
                 placeholder="Enter message or upload file...",
                 show_label=False,
-                file_types = [".pdf"],
+                file_types=[".pdf"],
             )
 
             chat_msg = chat_input.submit(
