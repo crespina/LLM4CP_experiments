@@ -41,6 +41,7 @@ class GUI:
     def print_like_dislike(x: gr.LikeData):
         # TODO : do something with the like/dislike infos
         print(x.index, x.value, x.liked)
+    
 
     def add_message(self, message):
         if message["files"] is not None and message["text"] != '':
