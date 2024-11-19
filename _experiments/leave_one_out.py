@@ -205,7 +205,7 @@ def rank(query, vector_index, vector_retriever, llm):
 
     query_templated = QueryBundle(query)
     retrieved_nodes = vector_retriever.retrieve(query_templated)
-    reranker = CohereRerank(api_key="bk0m8vejhUPHMYwrtrBtL06juj0HDC0d3wGkSXOj", top_n=5)
+    reranker = CohereRerank(api_key="STPahNFoWeYX4FSAoMx7NzHNgH2ejINXLDKIYOr4", top_n=5)
     reranked_nodes = reranker.postprocess_nodes(retrieved_nodes, query_bundle=query_templated)
     time.sleep(6.5)
     return reranked_nodes
@@ -222,12 +222,7 @@ def create_last_question(llm, instances):
                 "system",
                 """
                 You are provided with a description of a constraint problem.
-                Generate a realistic and practical user question or scenario that would be naturally answered by solving the problem
-                but do not necessarily use the traditional or classical context of the problem. Think beyond the usual applications—use creative analogies or different contexts
-                The questions should incorporate real-life constraints, preferences, and priorities that reflect the problem's structure.
-                For example, focus on specific goals the user wants to achieve, the constraints they face, and the trade-offs they might need to consider.
-                The questions should never incorporate the name of the given problem.
-                You can decide to incorporate numeric dummy data into the questions.
+                Generate a question that would be answered by said model. 
                 """,
             ),
             ("user", input),
@@ -243,17 +238,14 @@ def create_last_question(llm, instances):
     )
 
 
-def leave_one_out(instances, llm):   
-    print("start") 
-    """
-    last_questions = {}
+def leave_one_out(instances, llm):  
+     
     for key,value in instances.items() :
-        last_question[key] = value.metadata["question5"]
-        del value.metadata["question5"]
-    """
+        del value.metadata["last_q"]
+
     vector_index, vector_retriever = embedding(instances)
 
-    """
+    
     hot_llm = llm = ChatGroq(
         model="llama-3.2-90b-text-preview",
         temperature=0.5,
@@ -263,7 +255,7 @@ def leave_one_out(instances, llm):
     )
 
     create_last_question(hot_llm,instances)
-    """
+    
 
     total = 0
     correct1 = 0
@@ -322,7 +314,7 @@ def leave_one_out(instances, llm):
 
 def leave_one_out_5_questions(instances, llm):
 
-    out = ["question1", "question2", "question3", "question4", "question5"]
+    out = ["question1"]
 
     for qout in out : 
         print("start", qout)

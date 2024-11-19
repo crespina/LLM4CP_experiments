@@ -298,18 +298,25 @@ for key, value in instances.items():
 
 def barplot_families():
 
+    """
+    1 : total = 95 correct1 = 45 correct2 = 15 correct3 = 4 correct4 = 8 correct5 = 2 incorrect 21
+    2 : total = 95 correct1 = 38 correct2 = 16 correct3 = 9 correct4 = 6 correct5 = 2 incorrect 24
+    3 : total = 95 correct1 = 40 correct2 = 15 correct3 = 8 correct4 = 3 correct5 = 5 incorrect 24
+    4 : total = 95 correct1 = 73 correct2 = 7 correct3 = 3 correct4 = 1 correct5 = 0 incorrect 11
+    5 : total = 95 correct1 = 29 correct2 = 12 correct3 = 4 correct4 = 7 correct5 = 2 incorrect 41
+    """
     # Data
     labels = ["First", "Second", "Third", "Fourth", "Fifth", "Incorrect"]
-    values = [26, 13, 9, 7, 3, 37]
+    values = [29, 12, 4, 7, 2, 41]
 
     # Plotting
     plt.figure(figsize=(8, 6))
     plt.bar(labels, values, color=["green", "green", "green", "green", "green", "red"])
     plt.xlabel("Propositions")
     plt.ylabel("Counts")
-    plt.title("Identification of the problem : leave last question")
+    plt.title("Identification of the problem : leave question 5")
     plt.savefig(
-        "_results\\figures\leave_one_out\\first.pdf",
+        "_results\\figures\leave_one_out_5\\fifth.pdf",
         format="pdf",
         bbox_inches="tight",
     )
@@ -322,11 +329,7 @@ def barplot_families():
 
 # SpectralClustering_plot("llama32_90b_base_test_spectral", embedding_vectors=embedding_dict, labels=labels, best_n=5)
 
-hierarchical_clustering_plot(
-    "llama32_90b_both_base\llama32_90b_both_base_embedding_hierarchical_larger.pdf",
-    embedding_vectors=embedding_dict,
-    labels=labels,
-)
+# hierarchical_clustering_plot("llama32_90b_both_base\llama32_90b_both_base_embedding_hierarchical_larger.pdf",embedding_vectors=embedding_dict,labels=labels)
 
 
-# sspectral clustering -> eigenvalues
+barplot_families()
