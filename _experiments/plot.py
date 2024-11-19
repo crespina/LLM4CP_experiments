@@ -284,7 +284,7 @@ def hierarchical_clustering_plot(
 
     plt.show()
 
-
+"""
 instances = util.load_instances(
     "MnZcDescriptor\data\model_checkpoints\llama32_90b_both_base_embedding.pkl"
 )
@@ -294,7 +294,7 @@ embedding_dict = {}
 for key, value in instances.items():
     labels.append(key)
     embedding_dict[key] = value.metadata["embedding_vector"]
-
+"""
 
 def barplot_families():
 
@@ -304,19 +304,20 @@ def barplot_families():
     3 : total = 95 correct1 = 40 correct2 = 15 correct3 = 8 correct4 = 3 correct5 = 5 incorrect 24
     4 : total = 95 correct1 = 73 correct2 = 7 correct3 = 3 correct4 = 1 correct5 = 0 incorrect 11
     5 : total = 95 correct1 = 29 correct2 = 12 correct3 = 4 correct4 = 7 correct5 = 2 incorrect 41
+    new q : total = 95 correct1 = 85 correct2 = 7 correct3 = 1 correct4 = 1 correct5 = 1 incorrect 0
     """
     # Data
     labels = ["First", "Second", "Third", "Fourth", "Fifth", "Incorrect"]
-    values = [29, 12, 4, 7, 2, 41]
+    values = [85, 7, 1, 1, 1, 0]
 
     # Plotting
     plt.figure(figsize=(8, 6))
     plt.bar(labels, values, color=["green", "green", "green", "green", "green", "red"])
     plt.xlabel("Propositions")
     plt.ylabel("Counts")
-    plt.title("Identification of the problem : leave question 5")
+    plt.title("Identification of the problem : newly created question")
     plt.savefig(
-        "_results\\figures\leave_one_out_5\\fifth.pdf",
+        "_results\\figures\create_new_q\\new_q.pdf",
         format="pdf",
         bbox_inches="tight",
     )

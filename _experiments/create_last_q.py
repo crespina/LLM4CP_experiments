@@ -1,0 +1,416 @@
+import json
+import os
+import re
+import time
+from typing import Sequence
+from pydantic import BaseModel, Field
+from llama_index.core import Document
+from langchain_groq import ChatGroq
+from pathlib import Path
+from llama_index.core import ChatPromptTemplate
+from llama_index.core.llms import ChatMessage
+from llama_index.core import VectorStoreIndex
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.postprocessor.cohere_rerank import CohereRerank
+from llama_index.core import Settings
+import numpy as np
+import util
+import copy
+from llama_index.core.indices.query.schema import QueryBundle
+from llama_index.core.retrievers import BaseRetriever, VectorIndexRetriever
+import sys
+import cohere
+
+os.environ["LANGCHAIN_TRACING_V2"] = "true"
+os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
+os.environ["LANGCHAIN_API_KEY"] = "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"
+os.environ["LLAMA_CLOUD_API_KEY"] = (
+    "llx-69uKeyDcP4GtxQ9TaJkczA29jOlnzKSvuyu9HKlpuaRoNfx3"
+)
+os.environ["GROQ_API_KEY"] = "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"
+# os.environ["OPENAI_API_KEY"] = "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")
+
+
+class TextDescription(BaseModel):
+    """A description in English of a problem represented by a MiniZinc model"""
+
+    name: str = Field(description="The name of the problem")
+    description: str = Field(description="A description of the problem")
+    variables: str = Field(
+        description="All the decision variables in mathematical notation, followed by an explanation of what they are in English"
+    )
+    constraints: str = Field(
+        description="All the constraints in mathematical notation only"
+    )
+    objective: str = Field(
+        description="The objective of the problem (minimize or maximize what value)"
+    )
+
+
+class Questions(BaseModel):
+    """Situations or problems that a user could be facing that would be modelled as the given described model"""
+
+    question1: str = Field(
+        description="A question/scenario that is from a user very skilled in modelling and solving constraint problems"
+    )
+    question2: str = Field(
+        description="A question/scenario that is from a user that knows nothing about formal modelling and solving constraint problems"
+    )
+    question3: str = Field(description="A question/scenario that is from a young user")
+    question4: str = Field(description="A question/scenario that is very short")
+    question5: str = Field(
+        description="A question/scenario that is very long and specific"
+    )
+
+
+def replace(string, dict):
+    for family_name, problems in dict.items():
+        for problem in problems:
+            if problem == string:
+                string = string.replace(problem, family_name)
+    return string
+
+
+global new_q
+new_q = {
+    "array_quest": "If I have a 3x4 matrix with specific values, how can I rearrange the elements so that the rows become columns and the columns become rows?",
+    "assign": "I have 5 workers and 5 tasks, and I know how much profit each worker would bring in for each task: worker 1 would bring in $100 for task A, $80 for task B, and so on. How can I assign the workers to the tasks to get the highest total profit?",
+    "assign_dual": "I have 5 workers and 5 tasks, with the following profit tables:"
+    + "Task 1: Worker 1 ($100), Worker 2 ($80), Worker 3 ($90), Worker 4 ($70), Worker 5 ($60)"
+    + "Task 2: Worker 1 ($60), Worker 2 ($90), Worker 3 ($80), Worker 4 ($100), Worker 5 ($70)"
+    + "Task 3: Worker 1 ($80), Worker 2 ($70), Worker 3 ($60), Worker 4 ($90), Worker 5 ($100)"
+    + "Task 4: Worker 1 ($90), Worker 2 ($100), Worker 3 ($70), Worker 4 ($60), Worker 5 ($80)"
+    + "Task 5: Worker 1 ($70), Worker 2 ($60), Worker 3 ($100), Worker 4 ($80), Worker 5 ($90)"
+    + "What is the optimal assignment of workers to tasks that would maximize the total profit?",
+    "assign_inverse": "How can I assign 5 workers to 5 tasks in order to maximize profit when the profit for each worker-task pair is: worker A-task 1: $100, worker A-task 2: $80, ..., worker E-task 5: $120?",
+    "aust_color": "Can I colour the map of Australia with 4 colours so that no two states sharing a border have the same colour?",
+    "aust_colord": "What is the minimum number of colours required to colour the map of Australia such that no two adjacent states have the same colour?",
+    "carpet_cutting": "What is the minimum length of carpet required to pack 5 rectangles of dimensions 10x5, 8x3, 12x6, 7x4, and 9x2, without overlapping, into a carpet with a fixed height of 15 units?",
+    "carpet_cutting_geost": "How can I arrange these 5 rectangles of different sizes into 2 rooms such that the total length of the carpet required is as small as possible?",
+    "cc_geost": "If I have a carpet that is 10 units high and three rooms to cover with allowed shapes of 1x2 or 2x1 for rooms 1 and 2, and 2x2 or 1x4 for room 3, what is the minimum length of carpet I need to cut to cover all the rooms?",
+    "cell_block": "How can I arrange 20 male and female prisoners in a 10x10 grid of cells with different costs, such that no two prisoners are in the same cell, male prisoners are in the bottom half, female prisoners are in the top half, and prisoners considered a danger to each other are separated by at least one cell, while minimizing the total cost?",
+    "cell_block_func": "What is the minimum total cost to place 10 prisoners in a 5x5 grid of cells, given that each prisoner has a specific cost associated with each cell, and that 3 of the prisoners are female, 4 are male, and 2 pairs of prisoners are in danger of each other.",
+    "cluster": "How can I group these 10 points (with coordinates 1, 2, 3, 4, 5, 6, 7, 8, 9, 10) into 3 clusters such that the maximum distance between any two points in the same cluster is minimized and the clusters are ordered in a way that the first point in each cluster is smaller than the first point in the next cluster?",
+    "combinedlangford": "How can I arrange four copies of the numbers 1 to 4 in a sequence such that any two consecutive copies of a number are separated by that number of other digits?",
+    "compatible_assignment": "How can I assign tasks to 10 workers so that each task is only done once, workers doing consecutive tasks are compatible, and the total profit from all tasks is maximized?",
+    "compatible_assignment_opt": "If I have 5 workers and 5 tasks, with worker-task profit pairs as follows: worker 1-task 1: $10, worker 1-task 2: $8, worker 2-task 1: $12, worker 2-task 2: $15, worker 3-task 3: $20, worker 4-task 4: $18, worker 5-task 5: $25, and compatibility constraints that prevent worker 1 from working with worker 2, and worker 3 from working with worker 4, what is the optimal assignment of tasks to workers to maximize profit?",
+    "constrained_connected": "How can I group a set of nodes into clusters such that no two nodes in the same cluster are connected by an edge, while also ensuring that certain pairs of nodes are never in the same cluster, and maximizing the total number of edges between nodes in the same cluster?",
+    "context": "What Boolean values can be assigned to 10 variables and a non-zero variable such that only one of the 10 variables is true and the non-zero variable is true if and only if only one of the 10 variables is true?",
+    "crazy_sets": "What is the maximum number of subsets of size 3 that can be chosen from a set of 10 elements such that no three subsets intersect?",
+    "crazy_sets_global": "If there are 8 golfers and they need to be divided into groups of 3 for 4 rounds of golf, is there a way to schedule them so that no two golfers play together more than once?",
+    "debug1": "How can I schedule a set of jobs with given deadlines to ensure that every job is completed before its deadline?",
+    "debug2": "If I have 10 tasks that need to be completed by 10 agents, and tasks 3, 5, and 7 are already assigned to agents 2, 5, and 8 respectively, what is a valid assignment of the remaining tasks to the available agents?",
+    "debug3": "Given the priority jobs: job1 with priority 3, job2 with priority 2, and job3 with priority 1, how should I schedule them to meet the constraints that require higher priority jobs to be scheduled before lower priority jobs?",
+    "division": "What are the possible values of x and y that satisfy the condition where x is divided by y with a remainder, given that y must be a positive integer between -4 and 4, and x is also an integer between -4 and 4?",
+    "domwdeg": "Can I have 9 golfers divided into groups such that no two golfers are in the same group and I have a total of 4 groups?",
+    "doublechannel": "If I have 5 ships with desired start times of 8am, 9am, 10am, 11am, and 12pm, and speeds of 10, 12, 8, 9, and 11 units per hour respectively, and 2 channels with lengths of 100 and 120 units, and assuming a leeway of 1 hour, how should I schedule the ships to minimize the total delay from their desired start times?",
+    "evenproblem": "What number between -1 and 7 is not divisible by 2?",
+    "flattening1": "What are the possible combinations of x, y, and z that satisfy the condition where the sum of the product of x and y, and y and z is less than or equal to 6?",
+    "flattening10": "Can four golfers be placed on a 5x5 grid such that they are either at the same position or at least 4 units apart in Manhattan distance from each other?",
+    "flattening11": "What are the possible values for x, y, z, and t that satisfy the condition where y, z, and t are all different, and if x is not 0, then x, y, and z are also all different?",
+    "flattening12": "Can two whole numbers between 0 and 25 be chosen such that the sum of their square roots is at least 8?",
+    "flattening13": "What are the smallest two non-negative values whose square roots add up to more than 8?",
+    "flattening14": "What number can I divide 9 by that won't give me a whole number as a result, without using 2 as the divisor?",
+    "flattening2": "What values of x, y, and z will satisfy the given non-linear constraint when i is 1 and j is 2?",
+    "flattening3": "Can I place a point within a certain area in a way that it stays inside a circle with a radius of about 2.45 units, and if so, what are the coordinates of that point?",
+    "flattening4": "What are some integer values of x, y, and z that satisfy the equation x + 2*(y - x) + z ≤ 4*z, given that x is between 0 and 5, y is between 0 and 2, and z is between 0 and 3?",
+    "flattening5": "If I have a knapsack that can hold 50 pounds and I have 5 items with the following weights and values: Item A (10 pounds, $60), Item B (20 pounds, $100), Item C (15 pounds, $80), Item D (30 pounds, $120), and Item E (5 pounds, $40), what combination of items should I include in the knapsack to maximize the value without exceeding the weight limit?",
+    "flattening6": "What are the possible configurations of a 3x3 chessboard where at most one queen attacks the square in the second row and first column?",
+    "flattening7": "If b is true, what are the possible values of x and y that satisfy the given constraint?",
+    "flattening8": "Is there a set of values for x, y, z, u, and t that satisfies the condition where if x is greater than 0, then the sum of the boolean to integer conversion of (y > 0 and z > 0) and t is greater than or equal to u?",
+    "flattening9": "Can you find values for x, y, z, u, and t that make the statement 'x is less than or equal to 0' or 'y and z are both greater than 0 and the sum of t and 1 (if y and z are greater than 0) is greater than or equal to u' true?",
+    "graph": "What numbers can be assigned to each of the 8 vertices in the given graph such that no two adjacent vertices have numbers that differ by less than 2?",
+    "inverselangford": "How can I arrange three copies of the digits 1 to 4 in a sequence such that any two consecutive copies of a digit are separated by that digit's value?",
+    "itemset_mining": "I have a database of transactions from my store, with each transaction containing a list of items and their prices. What is the smallest set of items that appears in at least 100 transactions and has a total price of at least $1000?",
+    "jobshop": "What is the minimum amount of time required to complete all jobs on the available machines, and what order should the tasks be performed in to achieve this, given that each job has a specific sequence of tasks and only one task can be performed on a machine at a time?",
+    "jobshop2": "How can I schedule 5 jobs, each consisting of 3 tasks, on 3 machines with different processing times for each task, to complete all jobs as quickly as possible?",
+    "jobshop3": "What is the schedule for a set of 5 jobs, each consisting of 3 tasks, that will result in the shortest overall completion time when performed on 3 machines?",
+    "knapsack": "If I have 10 items to choose from, each with a specific weight and value, and a backpack that can only hold 20 pounds, how can I select the items to put in my backpack to maximize their total value without exceeding the weight limit?",
+    "knapsack01": "I have 5 items of different weights and values, and a knapsack that can hold a maximum of 10 kg. The items are: 1 kg for £60, 2 kg for £100, 3 kg for £120, 4 kg for £80, and 5 kg for £150. How should I choose items to put in the knapsack to get the highest total value without exceeding the weight limit?",
+    "knapsack01bool": "If I have 5 items with weights 2, 5, 3, 1, 4 and values 10, 20, 15, 5, 25, and a knapsack capacity of 10, what combination of items should I choose to maximize the total value while staying within the weight limit?",
+    "knapsack01set": "If I have 10 items, each with a different weight and value, and I can only carry a total weight of 50 units, which items should I choose to maximize my total value?",
+    "knapsack01set_concise": "I have 5 items I want to pack for a trip: a laptop (3 kg, $1000), a book (0.5 kg, $20), a water bottle (1 kg, $10), a first aid kit (2 kg, $50), and a sweater (1.5 kg, $30). My backpack can hold a maximum of 6 kg. What items should I pack to get the most value while staying under the weight limit?",
+    "langford": "How can I arrange 3 copies of the numbers 1 to 4 in a sequence of 12 digits, so that any two consecutive copies of a number are separated by that number of other digits?",
+    "loan": "If I borrowed $10,000 at an interest rate of 6%% and repaid the loan in quarterly installments of $2,500, what would be the balance owing at the end of the year?",
+    "lots": "How can I assign distinct numbers from 1 to 10 to the vertices of a line of 10 points, such that the difference between the numbers on any two adjacent points is unique?",
+    "ltsp": "What is the shortest route a salesman can take to visit 10 cities with specific order requirements, given the coordinates of each city, and return to the starting city?",
+    "mip1": "What is the optimal allocation of resources to activities B, C, and D to achieve the highest total value, given the limited availability of resources and the different requirements and values of each activity?",
+    "mip2": "What are the optimal values for B, C, and D that result in the maximum value of the expression B - C + D, while satisfying all given constraints?",
+    "mip3": "What is the optimal combination of items B, C, and D that I can include in my three knapsacks to maximize their total value without exceeding their capacities?",
+    "mip4": "What is the optimal combination of items with weights 7 and 4 that can fit within a weight limit of 13 to maximize the total value of 21 per item of weight 7 and 11 per item of weight 4, assuming I can only include a whole number of each item?",
+    "mip5": "What is the optimal combination of two items, with one item worth $8 and weighing 1 unit and the other worth $5 and weighing 1 unit, that I can put in a knapsack with a capacity of 6 units and a weight limit of 45 units to maximize the total value?",
+    "missingsolution": "How can I arrange 10 people (5 men and 5 women with ages 20, 25, 30, 35, 40, 22, 27, 32, 37, 42) in a line so that men and women take turns and no two people next to each other have an age difference of more than 10 years?",
+    "missing_solution": "Can you arrange 8 people, consisting of 4 men and 4 women with ages 20, 25, 21, 30, 28, 22, 26, and 29, in a line so that men and women alternate and no two consecutive people have an age difference greater than 10 years?",
+    "myabs": "Can I find integer values for a and b such that if the absolute value of a is greater than 4, then b is less than 4?",
+    "mydiv": "What are the possible values of a and b such that a divided by b is not equal to 1, given that a and b can be any integer from 0 to 5 and b cannot be zero?",
+    "nurses": "How can I schedule 10 nurses to work either day or night shifts over a 7-day period, ensuring that each nurse works at least 3 day shifts and no nurse works two consecutive night shifts?",
+    "nurses_let": "Can I create a 7-day schedule for 10 nurses, ensuring no nurse works more than two consecutive night shifts and the number of nurses on the night shift each day is between 2 and 4?",
+    "photo": "How can I arrange 16 golfers into groups of 4 for 4 rounds of golf, so that each golfer plays with every other golfer exactly once, and also maximize the number of times golfers who are friends play together?",
+    "project_scheduling": "If I have 5 machines and 10 tasks with different durations and dependencies, what is the shortest time needed to complete all tasks while respecting their order?",
+    "project_scheduling_nonoverlap": "How can I schedule tasks with different durations and dependencies on each other, without overlapping them, to get everything done as quickly as possible?",
+    "queens": "Can you find a way to place 8 queens on a standard 8x8 chessboard so that none of the queens are in the same row, column, or diagonal?",
+    "rcpsp": "If I have 10 tasks that need to be completed, each requiring a certain amount of time and resources, and some tasks can only start after others are finished, how can I schedule these tasks to finish them as quickly as possible while not using more resources than I have available?",
+    "rel_sem": "What are the integer values of x and y between -4 and 4 that make x at least twice as large as y?",
+    "rel_sem2": "What values should be assigned to x[1] and x[2] to satisfy the given condition when i is 1 and i is 2?",
+    "restart": "How can I assign numbers from 1 to 10 to 10 different items so that each item gets a different number, items 2 to 10 get a number less than or equal to 9, and the first item gets a number greater than or equal to 9?",
+    "restart2": "How can I assign 10 different values from 1 to 10 to 10 variables so that each variable has a unique value, the first variable is at least 9, and all other variables are at most 9?",
+    "restarta": "Can you find a sequence of ten numbers from 1 to 10 where the first number is at least 9 and the rest are 9 or less, and no number is repeated?",
+    "setselect": "If I have 10 different groups of people with overlapping interests and I can only choose groups that have no members in common, how can I pick the groups so that the total number of people I choose is as high as possible?",
+    "setselectr": "How can I select the largest subset of elements from a collection of sets such that no element appears in more than one of the selected sets?",
+    "setselectr2": "What is the maximum number of distinct groups that can be formed from a collection of 10 sets, each containing a subset of the numbers 1-20, such that no group contains more than one number from any of the original sets?",
+    "setselectr3": "Given a collection of sets where each set contains a subset of elements from a universe, how can I choose the largest number of sets such that no two chosen sets have any elements in common?",
+    "shipping": "How can I minimize the cost of shipping goods from my three factories, which have production capacities of 100, 150, and 200 units, to my four warehouses, which have demands of 50, 75, 100, and 125 units, given the shipping costs per unit from each factory to each warehouse?",
+    "simple-prod-planning": "If I have a factory that produces three products (A, B, and C) that use two resources (labor and materials), and each product has a different profit margin and resource consumption rate, how can I determine the production levels of A, B, and C to maximize my total profit while not exceeding the available labor and materials?",
+    "square_pack": "What is the minimum area of a rectangle that can fit 5 squares of sizes 3, 4, 5, 2, and 6 without any of them overlapping?",
+    "stableroommates": "Can I pair up 10 friends in a way that no two friends would rather be paired with each other than with who they're currently matched with?",
+    "stableroommates_func": "If I have 10 roommates and each roommate has a list of their preferred roommates in order of preference, is it possible to pair up the roommates in a way that no two roommates would rather be with each other than with their assigned roommate?",
+    "submultisetsum": "Can I find a combination of numbers from a list of 10 numbers (3, 6, 8, 2, 1, 9, 5, 7, 4, 6) that adds up to 20?",
+    "table_example": "I'm looking for a car that's from 2015 or later, has 4 doors, and costs less than $20,000 - what are my options if I also want the car to be either blue or red?",
+    "table_seating": "If I have 16 golfers and I want them to play in groups of 4 for one week, how can I assign them to tables so that no two golfers play together more than once and the total of the table numbers of the couples is minimized?",
+    "table_seating_gcc": "How can I arrange 20 golfers, consisting of 5 couples and 3 key persons, into groups of 4 for 5 consecutive days, ensuring that no two golfers play together more than once, couples are not in the same group, and key persons are not in the same group, while minimizing the total number of different tables that couples and key persons are assigned to?",
+    "teamselect": "How can I create three ice hockey teams with a specific composition of players, including goalies, defensemen, and forwards, from a pool of 11 players, to maximize the total value of the players in each team?",
+    "teamselect_advanced": "What is the best way to choose three teams of six players from eleven available players, with at least one goalie, two defenders, and two forwards on each team, and no more than two players from the same team on both Xavier and Yuri or Xavier and Zena, in order to get the highest total team value?",
+    "test": "How can I divide the combined elements of two groups into two separate groups, so that each element is only in one group?",
+    "toomany" : "What is the maximum total production of colored items that can be achieved across all machines, given the production capacity constraints and the specific color production rules?",
+    "toy_problem": "How many units of each product should be manufactured to maximize revenue, given that the production of product B requires 140 units of a limited resource and product T requires 200 units, and there are 40*200*140 units of the resource available?",
+    "trace": "Can I schedule these 10 jobs with processing times of 5, 3, 7, 2, 9, 1, 6, 8, 4, and 5 hours on a single machine in a way that the end time of each job is less than the end time of the job that is 3 positions ahead of it in the schedule?",
+}
+
+
+global families
+families = {
+    "assign": ["assign", "assign_dual", "assign_inverse"],
+    "aust_color": ["aust_color", "aust_colord"],
+    "buggy": [
+        "context",
+        "debug1",
+        "debug2",
+        "debug3",
+        "division",
+        "evenproblem",
+        "missing_solution",
+        "test",
+        "trace",
+    ],
+    "carpet_cutting": ["carpet_cutting", "carpet_cutting_geost", "cc_geost"],
+    "cell_block": ["cell_block", "cell_block_func"],
+    "cluster": ["cluster"],
+    "compatible_assignment": ["compatible_assignment", "compatible_assignment_opt"],
+    "constrained_connected": ["constrained_connected"],
+    "crazy_sets": ["crazy_sets", "crazy_sets_global"],
+    "doublechannel": ["doublechannel"],
+    "flattening": [
+        "flattening0",
+        "flattening1",
+        "flattening2",
+        "flattening3",
+        "flattening4",
+        "flattening5",
+        "flattening6",
+        "flattening7",
+        "flattening8",
+        "flattening9",
+        "flattening10",
+        "flattening11",
+        "flattening12",
+        "flattening13",
+        "flattening14",
+    ],
+    "jobshop": ["jobshop", "jobshop2", "jobshop3"],
+    "knapsack": [
+        "knapsack",
+        "knapsack01",
+        "knapsack01bool",
+        "knapsack01set",
+        "knapsack01set_concise",
+    ],
+    "langford": ["combinedlangford", "inverselangford", "langford"],
+    "linetsp": ["ltsp"],
+    "loan": ["loan1", "loan2"],
+    "mip": ["mip1", "mip2", "mip3", "mip4", "mip5"],
+    "nurses": ["nurses", "nurses_let"],
+    "photo": ["photo"],
+    "production_planning": ["simple-prod-planning"],
+    "project_scheduling": ["project_scheduling", "project_scheduling_nonoverlap"],
+    "rcpsp": ["rcpsp"],
+    "rel_sem": ["rel_sem", "rel_sem2"],
+    "restart": ["restart", "restart2", "restarta"],
+    "search": ["assign", "domwdeg"],
+    "setselect": [
+        "setselect",
+        "setselectr",
+        "setselectr2",
+        "setselectr3",
+        "setselect2",
+        "setselect3",
+    ],
+    "shipping": ["shipping"],
+    "stable_roommates": ["stableroommates", "stable_roommates_func"],
+    "submultisetsum": ["submultisetsum"],
+    "table_seating": ["table_seating", "table_seating_gcc"],
+    "team_select": ["teamselect", "teamselect_advanced"],
+    "array_quest": ["array_quest"],
+    "graph": ["graph"],
+    "itemset_mining": ["itemset_mining"],
+    "lots": ["lots"],
+    "missingsolution": ["missingsolution"],
+    "myabs": ["myabs"],
+    "mydiv": ["mydiv"],
+    "queens": ["queens"],
+    "square_pack": ["square_pack"],
+    "table_example": ["table_example"],
+    "toomany": ["toomany"],
+    "toy_problem": ["toy_problem"],
+}
+
+
+def embedding(instances):
+
+    for doc in instances.values():
+        if "embedding_vector" in doc.metadata.keys():
+            del doc.metadata["embedding_vector"]
+
+    embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-base-en-v1.5")
+    documents: Sequence[Document] = [content for content in instances.values()]
+
+    Settings.chunk_size = 2048
+    vector_index = VectorStoreIndex.from_documents(documents, embed_model=embed_model)
+
+    vector_retriever = VectorIndexRetriever(
+        index=vector_index,
+        similarity_top_k=20,
+        embed_model=embed_model,
+    )
+
+    print("embedding done")
+    return vector_retriever
+
+
+def rank(query, vector_retriever):
+
+    query_templated = QueryBundle(query)
+    retrieved_nodes = vector_retriever.retrieve(query_templated)
+    reranker = CohereRerank(api_key="STPahNFoWeYX4FSAoMx7NzHNgH2ejINXLDKIYOr4", top_n=5)
+    reranked_nodes = reranker.postprocess_nodes(
+        retrieved_nodes, query_bundle=query_templated
+    )
+    time.sleep(6.5)
+    return reranked_nodes
+
+
+def create_last_question(llm, instances):
+
+    questions = {}
+    for _, value in instances.items():
+
+        input = value.metadata["text_description"].__str__()
+
+        chat_text_qa_msgs = [
+            (
+                "system",
+                """
+                You are provided with a description of a constraint problem.
+                Generate a question that would be answered by said model. 
+                You should mimic a user that has little knowledge of constraint modelling.
+                You answer should only be the question you generate, with no introduction. 
+                Do not mention the name of the problem.
+                """,
+            ),
+            ("user", input),
+        ]
+
+        text_qa_template = ChatPromptTemplate.from_messages(chat_text_qa_msgs)
+
+        prompt = text_qa_template.format(input=input)
+        aimessage = llm.invoke(prompt)
+        questions[value.metadata["model_name"]] = aimessage.content
+        print(value.metadata["model_name"] + " : " + aimessage.content)
+        time.sleep(3)
+    
+    return questions
+
+def leave_one_out(instances):
+
+    for key, value in instances.items():
+        del value.metadata["last_q"]
+
+    vector_retriever = embedding(instances)
+
+    hot_llm = ChatGroq(
+        model="llama-3.1-70b-versatile",
+        temperature=0.5,
+        max_tokens=None,
+        timeout=None,
+        max_retries=2,
+    )
+
+    #questions = create_last_question(hot_llm, instances)
+    questions = new_q
+
+    total = 0
+    correct1 = 0
+    correct2 = 0
+    correct3 = 0
+    correct4 = 0
+    correct5 = 0
+    incorrect = 0
+    count = 0
+
+    for model_name, new_question in questions.items() :
+        # for key, val in instances.items():
+        count += 1
+        name = replace(model_name, families)
+
+        response = rank(query=new_question, vector_retriever=vector_retriever)
+
+        retrieved1 = replace(
+            response[0].metadata["model_name"], families
+        )
+        retrieved2 = replace(
+            response[1].metadata["model_name"], families
+        )
+        retrieved3 = replace(
+            response[2].metadata["model_name"], families
+        )
+        retrieved4 = replace(
+            response[3].metadata["model_name"], families
+        )
+        retrieved5 = replace(
+            response[4].metadata["model_name"], families
+        )
+
+        if name != retrieved1:
+            if name != retrieved2:
+                if name != retrieved3:
+                    if name != retrieved4:
+                        if name != retrieved5:
+                            incorrect += 1
+                        else:
+                            correct5 += 1
+                    else:
+                        correct4 += 1
+                else:
+                    correct3 += 1
+            else:
+                correct2 += 1
+        else:
+            correct1 += 1
+
+        total += 1
+        print(name, retrieved1, retrieved2, retrieved3, retrieved4, retrieved5)
+
+    print(
+        "total = " + str(total),
+        "correct1 = " + str(correct1),
+        "correct2 = " + str(correct2),
+        "correct3 = " + str(correct3),
+        "correct4 = " + str(correct4),
+        "correct5 = " + str(correct5),
+        "incorrect " + str(incorrect),
+    )
+
+
+path = "data\model_checkpoints\leave_one_out_full.pkl"
+instances = util.load_instances(path)
+
+leave_one_out(instances=instances)

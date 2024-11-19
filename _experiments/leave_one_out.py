@@ -398,4 +398,5 @@ llm = ChatGroq(
     max_retries=2,
 )
 
-leave_one_out_5_questions(instances=instances, llm=llm)
+#leave_one_out_5_questions(instances=instances, llm=llm)
+print("lol")
