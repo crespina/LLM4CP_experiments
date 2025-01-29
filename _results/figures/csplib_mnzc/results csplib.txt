@@ -1,0 +1,62 @@
+aust_color.txt
+---------
+flattening2 flattening9 flattening1 graph graph
+---------
+
+0
+
+
+cluster.txt
+---------
+cluster constrained_connected test setselectr2 flattening5
+---------
+
+1
+
+
+knapsack.txt
+---------
+knapsack01set knapsack01 flattening5 knapsack01bool mip5
+---------
+
+1
+
+
+langford.txt
+---------
+restarta crazy_sets inverselangford setselectr2 flattening4
+---------
+
+3
+
+
+nqueens.txt
+---------
+queens flattening6 flattening10 crazy_sets restarta
+---------
+
+1
+
+
+rcpsp.txt
+---------
+rcpsp project_scheduling_nonoverlap project_scheduling jobshop2 mip1
+---------
+
+
+1
+
+shpping.txt
+---------
+shipping toomany toomany toomany toomany
+---------
+
+1
+
+
+square_pack.txt
+---------
+square_pack flattening3 carpet_cutting carpet_cutting carpet_cutting
+---------
+
+1

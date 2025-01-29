@@ -1,0 +1,231 @@
+problem 97 The name of the problem is array_quest
+The problem is to transpose a given matrix, i.e., to swap its rows with columns.
+
+problem 98 The name of the problem is assign
+The Assignment Problem is a classic problem in Operations Research and Computer Science. It involves finding the optimal assignment of a set of workers to a set of tasks, given the profit or cost of each worker performing each task. The goal is to maximize the total profit or minimize the total cost.
+
+problem 99 The name of the problem is assign_dual
+The Assignment Problem is a classic problem in Operations Research and Computer Science. It involves assigning a set of workers to a set of tasks in such a way that the total profit is maximized. Each worker can only be assigned to one task, and each task can only be assigned to one worker.
+
+problem 100 The name of the problem is assign_inverse
+The Assignment Problem is a classic problem in Operations Research and Computer Science. It involves finding the optimal assignment of workers to tasks in order to maximize the total profit. The problem assumes that each worker can be assigned to only one task and each task can be assigned to only one worker.
+
+problem 101 The name of the problem is aust_color
+The Graph Colouring Problem is a classic problem in constraint programming and graph theory. It involves assigning colours to the vertices of a graph such that no two adjacent vertices have the same colour. In this specific model, the problem is applied to colouring the map of Australia using 4 colours.
+
+problem 102 The name of the problem is aust_colord
+The Graph Colouring Problem is a classic problem in constraint programming and graph theory. It involves assigning colours to the vertices of a graph such that no two adjacent vertices have the same colour. In this specific model, the problem is applied to colouring the map of Australia using a minimum number of colours.
+
+problem 103 The name of the problem is carpet_cutting
+The problem involves packing a set of rectangles of different sizes and shapes into a larger rectangle (the carpet) with a fixed height and a variable length. The goal is to minimize the length of the carpet used while ensuring that all rectangles are packed without overlapping.
+
+problem 104 The name of the problem is carpet_cutting_geost
+The problem is to pack a set of rectangles into a carpet of minimum length, where each rectangle has a specific size and offset. The rectangles are grouped into rooms, and each room can only contain rectangles of specific shapes.
+
+problem 105 The name of the problem is cc_geost
+The Carpet Cutting Problem is a classic problem in constraint programming. It involves cutting a carpet of a given height into smaller rectangles to cover a set of rooms, each with its own set of allowed shapes. The goal is to minimize the total length of the carpet used.
+
+problem 106 The name of the problem is cell_block
+The Prisoner Placement Problem is a classic problem in constraint programming. The problem involves placing prisoners in a grid of cells, where each cell has a certain cost associated with it. The goal is to minimize the total cost of placing all prisoners while satisfying certain constraints, such as ensuring that no two prisoners are in the same cell, prisoners in the 'danger' set are not adjacent to each other, and female prisoners are placed in the top half of the grid while male prisoners are placed in the bottom half.
+
+problem 107 The name of the problem is cell_block_func
+The Prisoner Placement Problem is a classic problem in constraint programming. The problem involves placing prisoners in a grid of cells, where each prisoner has a specific cost associated with each cell. The goal is to minimize the total cost of placing all prisoners while satisfying certain constraints, such as keeping prisoners in danger of each other at a safe distance and separating male and female prisoners.
+
+problem 108 The name of the problem is cluster
+The problem is a variant of the clustering problem where the goal is to partition a set of points into clusters such that the maximum distance between any two points in the same cluster is minimized. Additionally, the clusters must be ordered in a way that the first point in each cluster is smaller than the first point in the next cluster.
+
+problem 109 The name of the problem is combinedlangford
+Langford's problem is a classic problem in constraint programming. It involves arranging m copies of the digits 1 to n in a sequence such that any two consecutive copies of digit k are separated by k other digits.
+
+problem 110 The name of the problem is compatible_assignment
+The Task Assignment Problem is a classic problem in constraint programming. It involves assigning tasks to workers in a way that maximizes the total profit, while ensuring that certain compatibility constraints between workers are satisfied.
+
+problem 111 The name of the problem is compatible_assignment_opt
+The problem involves assigning tasks to workers in a way that maximizes the total profit. Each worker can be assigned to one task, and each task can be assigned to one worker. Additionally, there are compatibility constraints between workers that must be satisfied.
+
+problem 112 The name of the problem is constrained_connected
+The Constrained Clustering Problem is a classic problem in constraint programming. Given a set of nodes and edges, the goal is to find a maximal subset of edges such that no two nodes are connected, while also satisfying a set of constraints that specify which nodes cannot be in the same cluster.
+
+problem 113 The name of the problem is context
+This problem is a variation of the 'At Most One True' problem, which is a classic problem in constraint programming. The problem involves finding an assignment of boolean values to a set of variables such that at most one of them is true, and an additional variable is constrained to be non-zero if and only if at most one of the boolean variables is true.
+
+problem 114 The name of the problem is crazy_sets
+The Erdős-Ko-Rado problem is a well-known problem in combinatorial mathematics. It deals with finding the maximum number of subsets of a given size that can be chosen from a set of elements such that no two subsets intersect in more than one element. However, this model is a variation of the problem where we want to find a collection of subsets of a given size such that no three subsets intersect.
+
+problem 115 The name of the problem is crazy_sets_global
+The Social Golfer Problem is a classic problem in constraint programming. It involves scheduling golfers into groups such that no two golfers play together more than once. The problem is often used as a benchmark for constraint programming solvers.
+
+
+problem 119 The name of the problem is division
+The problem is to find integer values for x and y such that x can be divided by y with a remainder, where the divisor is 3.
+
+problem 120 The name of the problem is domwdeg
+The Social Golfers Problem is a classic problem in constraint programming. It involves scheduling golfers into groups over a number of weeks, with the constraint that no golfer can play with the same person more than once. However, the provided model seems to be a simplified version of the problem, focusing on the grouping aspect without considering the weeks.
+
+problem 121 The name of the problem is doublechannel
+The problem involves scheduling ships entering and leaving a port through a limited number of channels. Each ship has a desired start time, a speed, and a direction (entering or leaving). The goal is to minimize the total absolute difference between the actual start time and the desired start time for all ships.
+
+problem 122 The name of the problem is evenproblem
+This problem is a simple constraint satisfaction problem that aims to find an odd number within a given range.
+
+
+problem 137 The name of the problem is graph
+This problem involves assigning numbers from 1 to 8 to the vertices of a graph such that each number is used exactly once and the difference between the numbers of adjacent vertices is at least 2.
+
+problem 138 The name of the problem is inverselangford
+Langford's Problem is a classic problem in constraint programming. It involves arranging m copies of the digits 1 to n in a sequence such that any two consecutive copies of digit k are separated by k other digits.
+
+problem 139 The name of the problem is itemset_mining
+The problem of finding the smallest set of items that appears in at least a given number of transactions, with a minimum total price.
+
+problem 140 The name of the problem is jobshop
+The Job Shop Scheduling Problem is a classic problem in constraint programming and operations research. It involves scheduling a set of jobs on a set of machines, where each job consists of a sequence of tasks that must be performed in a specific order. The goal is to minimize the makespan, which is the maximum time required to complete all jobs.
+
+problem 141 The name of the problem is jobshop2
+The Job Shop Scheduling Problem is a classic problem in constraint programming and operations research. It involves scheduling a set of jobs on a set of machines, where each job consists of a sequence of tasks that must be performed in a specific order. Each task requires a specific machine and has a specific processing time. The goal is to find a schedule that minimizes the makespan, which is the maximum completion time of all jobs.
+
+problem 142 The name of the problem is jobshop3
+The Job Shop Scheduling Problem is a classic problem in constraint programming and operations research. It involves scheduling a set of jobs on a set of machines, where each job consists of a sequence of tasks that must be performed in a specific order. The goal is to minimize the makespan, which is the maximum completion time of all jobs.
+
+problem 143 The name of the problem is knapsack
+The 0/1 Knapsack Problem is a classic problem in combinatorial optimization. Given a set of objects, each with a profit and a size, and a knapsack with a limited capacity, the goal is to select a subset of the objects to include in the knapsack such that the total profit is maximized and the total size does not exceed the knapsack capacity.
+
+problem 144 The name of the problem is knapsack01
+The 0/1 Knapsack Problem is a classic problem in combinatorial optimization. Given a set of items, each with a weight and a value, determine the number of each item to include in a collection so that the total weight is less than or equal to a given limit and the total value is as large as possible.
+
+problem 145 The name of the problem is knapsack01bool
+The 0/1 Knapsack Problem is a classic problem in combinatorial optimization. Given a set of items, each with a weight and a value, determine the number of each item to include in a collection so that the total weight is less than or equal to a given limit and the total value is as large as possible.
+
+problem 146 The name of the problem is knapsack01set
+The 0/1 Knapsack Problem is a classic problem in combinatorial optimization. Given a set of items, each with a weight and a value, determine the number of each item to include in a collection so that the total weight is less than or equal to a given limit and the total value is as large as possible.
+
+problem 147 The name of the problem is knapsack01set_concise
+The 0/1 Knapsack Problem is a classic problem in combinatorial optimization. Given a set of objects, each with a profit and a size, and a knapsack with a limited capacity, the goal is to select a subset of the objects to include in the knapsack such that the total profit is maximized without exceeding the knapsack's capacity.
+
+problem 148 The name of the problem is langford
+Langford's Problem is a classic problem in constraint programming. It involves arranging m copies of the digits 1 to n in a sequence of length m*n, such that any two consecutive copies of digit k are separated by k other digits.
+
+problem 149 The name of the problem is loan
+This problem models a loan repayment scenario where a principal amount is borrowed at a certain interest rate and repaid in quarterly installments over a year. The goal is to determine the balance owing at the end of the year.
+
+problem 150 The name of the problem is lots
+A graceful graph is a graph whose vertices can be labeled with distinct integers such that the absolute difference between the labels of adjacent vertices are distinct. This problem is a specific instance of the graceful graph problem, where the graph is a path with 10 vertices.
+
+problem 151 The name of the problem is ltsp
+The Traveling Salesman Problem with Precedence Constraints is a classic problem in constraint programming and operations research. It involves finding the shortest possible tour that visits a set of cities and returns to the origin city, subject to precedence constraints that specify the order in which certain cities must be visited.
+
+problem 152 The name of the problem is mip1
+This problem involves allocating resources to different activities in order to maximize the total value obtained. The resources are limited, and the activities have different requirements and values.
+
+problem 153 The name of the problem is mip2
+A linear programming problem is a method to achieve the best outcome in a given mathematical model for some list of requirements represented as linear relationships. In this case, the problem is a maximization problem with three variables and four constraints.
+
+problem 154 The name of the problem is mip3
+The problem is a variant of the 0/1 knapsack problem, where we have to maximize the total value of items without exceeding the capacity of multiple knapsacks. Each item has a weight and a value, and we can either include or exclude an item.
+
+problem 155 The name of the problem is mip4
+The 0/1 Knapsack Problem is a classic problem in combinatorial optimization. Given a set of items, each with a weight and a value, determine the number of each item to include in a collection so that the total weight is less than or equal to a given limit and the total value is as large as possible.
+
+problem 156 The name of the problem is mip5
+The 0/1 Knapsack Problem is a classic problem in combinatorial optimization. Given a set of items, each with a weight and a value, determine the number of each item to include in a collection so that the total weight is less than or equal to a given limit and the total value is as large as possible.
+
+problem 157 The name of the problem is missingsolution
+This problem involves ordering a set of people in such a way that males and females alternate, and the age difference between consecutive people does not exceed 10 years.
+
+problem 158 The name of the problem is missing_solution
+This problem involves ordering a set of people in such a way that males and females alternate, and the age difference between consecutive people does not exceed 10 years.
+
+
+problem 161 The name of the problem is nurses
+The Nurse Scheduling Problem is a classic problem in constraint programming that involves scheduling nurses to work different shifts over a given period of time. The goal is to create a schedule that satisfies certain constraints, such as ensuring that each nurse works a certain number of day and night shifts, and that no nurse works two consecutive night shifts.
+
+problem 162 The name of the problem is nurses_let
+The Nurse Scheduling Problem is a classic problem in constraint programming that involves scheduling nurses to work different shifts over a given period of time. The goal is to create a schedule that satisfies certain constraints, such as the number of nurses working each shift, and the number of consecutive night shifts a nurse can work.
+
+problem 163 The name of the problem is photo
+The Social Golfer Problem is a classic problem in constraint programming. It involves scheduling golfers into groups such that each golfer plays with every other golfer exactly once. In this variation, the problem is extended to maximize the total friendship between adjacent golfers in the schedule.
+
+problem 164 The name of the problem is project_scheduling
+The Job Shop Scheduling Problem is a classic problem in constraint programming and operations research. It involves scheduling a set of tasks on a set of resources, subject to certain constraints. The goal is to find a schedule that minimizes the total time required to complete all tasks.
+
+problem 165 The name of the problem is project_scheduling_nonoverlap
+This problem involves scheduling a set of tasks with given durations and precedence relationships, ensuring that tasks do not overlap and that the makespan (the maximum completion time of all tasks) is minimized.
+
+problem 166 The name of the problem is queens
+The N-Queens problem is a classic problem in constraint programming. It involves placing N queens on an NxN chessboard such that no two queens attack each other. A queen can attack another queen if they are in the same row, column, or diagonal.
+
+problem 167 The name of the problem is rcpsp
+The Resource-Constrained Project Scheduling Problem (RCPSP) is a classic problem in Operations Research and Constraint Programming. It involves scheduling a set of tasks with given durations and resource requirements, subject to precedence constraints and limited resource availability. The goal is to find a schedule that minimizes the maximum completion time of all tasks.
+
+problem 168 The name of the problem is rel_sem
+This problem involves finding integer values for x and y such that x divided by y is greater than or equal to 2.
+
+problem 169 The name of the problem is rel_sem2
+This problem involves assigning values to variables based on a condition. The condition is that if a certain variable i is less than or equal to 2, then the corresponding variable x[i] must be greater than or equal to 1.
+
+problem 170 The name of the problem is restart
+The Social Golfer Problem is a classic problem in constraint programming. It involves scheduling golfers into groups such that no two golfers play together more than once. However, the provided model seems to be a simplified version of the problem, focusing on assigning different values to each variable.
+
+problem 171 The name of the problem is restart2
+The Social Golfer Problem is a classic problem in constraint programming. It involves scheduling golfers into groups such that no two golfers play together more than once. However, the provided model seems to be a simplified version of the problem, focusing on assigning different values to each variable.
+
+problem 172 The name of the problem is restarta
+This problem involves finding a permutation of numbers from 1 to 10, with the first number being at least 9 and the rest being less than or equal to 9. The problem is a variation of the classic permutation problem, with additional constraints on the domain of the variables.
+
+problem 173 The name of the problem is setselect
+The Set Packing Problem is a classic problem in combinatorial optimization and computer science. Given a collection of sets, the goal is to select the largest possible number of disjoint sets, i.e., sets that do not intersect with each other. In this specific model, we are also interested in maximizing the sum of the elements in the selected set.
+
+problem 174 The name of the problem is setselectr
+The Set Packing Problem is a classic problem in combinatorial optimization and computer science. Given a collection of sets, the goal is to select a subset of these sets such that each element is contained in at most one set in the subset. The problem is often used to model real-world problems such as scheduling, resource allocation, and network design.
+
+problem 175 The name of the problem is setselectr2
+The Set Packing Problem is a classic problem in combinatorial optimization and computer science. Given a collection of sets, the goal is to select the largest number of disjoint sets, i.e., sets that do not have any elements in common.
+
+problem 176 The name of the problem is setselectr3
+The Set Packing Problem is a classic problem in combinatorial optimization and computer science. Given a collection of sets, the goal is to select the maximum number of disjoint sets, i.e., sets that do not intersect with each other.
+
+problem 177 The name of the problem is shipping
+The Transportation Problem is a classic problem in Operations Research and Management Science that involves finding the most cost-effective way to transport a certain commodity from a set of sources (factories) to a set of destinations (warehouses).
+
+problem 178 The name of the problem is simple-prod-planning
+The Production Planning Problem is a classic problem in Operations Research and Constraint Programming. It involves determining the optimal production levels of different products given limited resources and varying profit margins. The goal is to maximize the total profit while not exceeding the available resources.
+
+problem 179 The name of the problem is square_pack
+The Square Packing Problem is a classic problem in constraint programming and operations research. The goal is to pack a set of squares of different sizes into a rectangle of minimal area. The problem is NP-hard, meaning that the running time of algorithms for solving it increases rapidly as the size of the input increases.
+
+problem 180 The name of the problem is stableroommates
+The Stable Roommates Problem is a well-known problem in constraint programming and computer science. It involves finding a stable matching between two sets of entities, in this case, agents. The problem is stable if there are no two agents who would prefer each other over their current match.
+
+problem 181 The name of the problem is stableroommates_func
+The Stable Roommates Problem is a well-known problem in constraint programming and computer science. It involves finding a stable matching between two sets of entities, in this case, agents or roommates. The problem is defined as follows: given a set of agents, each with a preference list of other agents, find a stable matching such that no two agents prefer each other over their current match.
+
+problem 182 The name of the problem is submultisetsum
+The Subset Sum Problem is a classic problem in computer science and operations research that involves finding a subset of a given set of integers that sums up to a target value. It is a well-known NP-complete problem, which means that the running time of traditional algorithms increases rapidly as the size of the input increases.
+
+problem 183 The name of the problem is table_example
+This problem involves selecting a car from a database based on certain criteria. The goal is to find a car that satisfies the given constraints.
+
+problem 184 The name of the problem is table_seating
+The Social Golfer Problem is a classic problem in constraint programming. It involves scheduling golfers into groups (tables) over multiple weeks (not considered in this model), with the constraint that no two golfers can be in the same group more than once. In this model, we are only considering one week and the objective is to minimize the sum of the table numbers of the couples.
+
+problem 185 The name of the problem is table_seating_gcc
+The Social Golfer Problem is a classic problem in constraint programming. The problem involves scheduling golfers into groups, ensuring that no two golfers play together more than once. In this variation, there are couples that must be seated at different tables and key persons that must also be seated at different tables.
+
+problem 186 The name of the problem is teamselect
+The problem involves forming three ice hockey teams, Xavier, Yuri, and Zena, from a pool of 11 players. Each team must have a specific composition, including at least one goalie, two defensemen, and two forwards. The objective is to maximize the total value of the players in each team.
+
+problem 187 The name of the problem is teamselect_advanced
+The problem involves selecting three teams of six players each from a pool of eleven players, with certain constraints on the positions of the players and the objective of maximizing the total value of the selected players.
+
+problem 188 The name of the problem is test
+The Set Partitioning Problem is a classic problem in constraint programming and operations research. It involves partitioning a set of elements into disjoint subsets, such that each element is assigned to exactly one subset. In this specific model, we have two sets A and B, and we want to find a partitioning of the union of these sets into two disjoint subsets.
+
+problem 189 The name of the problem is toomany
+This problem involves planning the production of different colored items on multiple machines, with constraints on the production capacity of each machine and the total production of each color. The goal is to maximize the total production across all machines and colors.
+
+problem 190 The name of the problem is toy_problem
+This problem represents a production planning scenario where two products, B and T, are manufactured using a limited resource. The goal is to maximize the total revenue by determining the optimal production levels of both products.
+
+problem 191 The name of the problem is trace
+The problem is a variant of the Job Scheduling Problem, where we have a set of jobs with given processing times and we need to schedule them on a single machine. The goal is to find a feasible schedule that satisfies the given constraints.
+
