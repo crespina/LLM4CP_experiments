@@ -15,15 +15,16 @@ Players can arrive at rehearsals immediately before the first piece in which the
 In the table below, 1 indicates that the player is required for the corresponding  piece, 0 otherwise. The duration (i.e. time required to rehearse each piece) is in some unspecified time units.
 
 
-<TABLE>
-   <TR><TD>Piece </TD><TD>   1 </TD><TD>  2</TD><TD>   3 </TD><TD>  4 </TD><TD>  5</TD><TD>   6 </TD><TD>  7</TD><TD>   8</TD><TD>   9 </TR>
-   <TR><TD>Player 1 </TD><TD> 1 </TD><TD>  1 </TD><TD>  0</TD><TD>   1</TD><TD>   0</TD><TD>   1</TD><TD>   1</TD><TD>   0</TD><TD>   1 </TR>
-   <TR><TD>Player 2</TD><TD>  1</TD><TD>   1</TD><TD>   0</TD><TD>   1</TD><TD>   1</TD><TD>   1</TD><TD>   0</TD><TD>   1</TD><TD>   0 </TR>
-   <TR><TD>Player 3</TD><TD>  1 </TD><TD>  1 </TD><TD>  0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  1 </TD><TD>  1 </TD><TD>  0 </TR>
-   <TR><TD>Player 4 </TD><TD> 1 </TD><TD>  0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  1 </TD><TD>  1 </TD><TD>  0 </TD><TD>  0 </TD><TD>  1 </TR>
-   <TR><TD>Player 5</TD><TD>  0 </TD><TD>  0 </TD><TD>  1 </TD><TD>  0 </TD><TD>  1 </TD><TD>  1 </TD><TD>  1 </TD><TD>  1 </TD><TD>  0 </TR>
-<TR><TD>Duration </TD><TD> 2 </TD><TD>  4 </TD><TD>  1 </TD><TD>  3 </TD><TD>  3 </TD><TD>  2 </TD><TD>  5 </TD><TD>  7 </TD><TD>  6 </TR>
-</TABLE>
+Piece      |  1  |  2  |  3  |  4  |  5  |  6  |  7  |  8  |  9  
+---------------------------------------------------------------
+Player 1   |  1  |  1  |  0  |  1  |  0  |  1  |  1  |  0  |  1  
+Player 2   |  1  |  1  |  0  |  1  |  1  |  1  |  0  |  1  |  0  
+Player 3   |  1  |  1  |  0  |  0  |  0  |  0  |  1  |  1  |  0  
+Player 4   |  1  |  0  |  0  |  0  |  1  |  1  |  0  |  0  |  1  
+Player 5   |  0  |  0  |  1  |  0  |  1  |  1  |  1  |  1  |  0  
+---------------------------------------------------------------
+Duration   |  2  |  4  |  1  |  3  |  3  |  2  |  5  |  7  |  6  
+
 
 
 For example, if the nine  pieces were rehearsed in numerical order as given above, then the total waiting time would be:
@@ -46,45 +47,35 @@ A very similar problem occurs in devising a schedule for shooting a film. Differ
 
 The first problem, <I>Film1</I>,  is based on  one given by Cheng, Diamond and Lin (see <A href="references/">references</A>).
 
-<TABLE>
- <TR><TD>  Day   </TD><TD>  1 </TD><TD > 2 </TD><TD >  3 </TD><TD >  4 </TD><TD >  5 </TD><TD >  6 </TD><TD >  7 </TD><TD >  8 </TD><TD >  9 </TD><TD >  10 </TD><TD >  11
-</TD><TD >  12 </TD><TD >  13 </TD><TD >  14 </TD><TD >  15 </TD><TD >  16 </TD><TD >  17 </TD><TD >  18 </TD><TD >  19 </TD><TD >  20 </TD><TD >  Cost/100  </TD></TR>
-<TR><TD>Actor 1   </TD><TD> 1 </TD><TD> 1 </TD><TD>  1 </TD><TD>  1 </TD><TD>  0 </TD><TD>  1 </TD><TD>  0 </TD><TD>  1 </TD><TD>  0 </TD><TD>  1 </TD><TD>  1 </TD><TD>  0
- </TD><TD>  0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  10</TD></TR>
-<TR><TD>Actor 2   </TD><TD> 1 </TD><TD> 1 </TD><TD>  1 </TD><TD>  0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  1 </TD><TD>  1 </TD><TD>  0 </TD><TD>  1 </TD><TD>  0 </TD><TD>  0
- </TD><TD>  1 </TD><TD>   1 </TD><TD>   1 </TD><TD>   0 </TD><TD>   1 </TD><TD>   0 </TD><TD>   0 </TD><TD>   1</TD><TD>  4</TD></TR>
-<TR><TD>Actor 3   </TD><TD> 0 </TD><TD> 1 </TD><TD>  1 </TD><TD>  0 </TD><TD>  1 </TD><TD>  0 </TD><TD>  1 </TD><TD>  1 </TD><TD>  0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  0
- </TD><TD>  1 </TD><TD>   1 </TD><TD>   1 </TD><TD>   0 </TD><TD>   0 </TD><TD>   0 </TD><TD>   0 </TD><TD>   0</TD><TD>  5</TD></TR>
-<TR><TD>Actor 4   </TD><TD> 0 </TD><TD> 0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  1 </TD><TD>  1 </TD><TD>  1
- </TD><TD>  1 </TD><TD>   0 </TD><TD>   0 </TD><TD>   0 </TD><TD>   0 </TD><TD>   0 </TD><TD>   0 </TD><TD>   0</TD><TD>  5</TD></TR>
-<TR><TD>Actor 5   </TD><TD> 0 </TD><TD> 1 </TD><TD>  0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  1 </TD><TD>  1 </TD><TD>  0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  1
- </TD><TD>  0 </TD><TD>   1 </TD><TD>   0 </TD><TD>   0 </TD><TD>   0 </TD><TD>   1 </TD><TD>   1 </TD><TD>   1</TD><TD>  5</TD></TR>
-<TR><TD>Actor 6   </TD><TD> 0 </TD><TD> 0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  0
- </TD><TD>  0 </TD><TD>   1 </TD><TD>   1 </TD><TD>   1 </TD><TD>   1 </TD><TD>   1 </TD><TD>   0 </TD><TD>   0</TD><TD>  40 </TD></TR>
-<TR><TD>Actor 7   </TD><TD> 0 </TD><TD> 0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  1 </TD><TD>  0 </TD><TD>  1 </TD><TD>  1 </TD><TD>  0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  0
- </TD><TD>  0 </TD><TD>   0 </TD><TD>   1 </TD><TD>   0 </TD><TD>   0 </TD><TD>   0 </TD><TD>   0 </TD><TD>   0</TD><TD> 4 </TD></TR>
-<TR><TD>Actor 8   </TD><TD> 0 </TD><TD> 0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  0 </TD><TD>  1 </TD><TD>  1 </TD><TD>  1 </TD><TD>  1 </TD><TD>  0 </TD><TD>  0 </TD><TD>  0
- </TD><TD>  0 </TD><TD>   0 </TD><TD>   0 </TD><TD>   0 </TD><TD>   0 </TD><TD>   0 </TD><TD>   0 </TD><TD>   0</TD><TD>  20</TD></TR>
-<TR><TD>Duration   </TD><TD> 2 </TD><TD> 1 </TD><TD>  1 </TD><TD>  1 </TD><TD>  1 </TD><TD>  3 </TD><TD>  1 </TD><TD>  1 </TD><TD>  1 </TD><TD>  2 </TD><TD>  1 </TD><TD>  1
- </TD><TD>  2 </TD><TD>  1 </TD><TD>  2 </TD><TD>  1 </TD><TD>  1 </TD><TD>  2 </TD><TD>  1 </TD><TD>  1</TD></TR>
-</TABLE>
+Day       |  1  |  2  |  3  |  4  |  5  |  6  |  7  |  8  |  9  | 10  | 11  | 12  | 13  | 14  | 15  | 16  | 17  | 18  | 19  | 20  | Cost/100  
+---------------------------------------------------------------------------------------------------------------------------
+Actor 1   |  1  |  1  |  1  |  1  |  0  |  1  |  0  |  1  |  0  |  1  |  1  |  0  |  0  |  0  |  0  |  0  |  0  |  0  |  0  |  0  |  10  
+Actor 2   |  1  |  1  |  1  |  0  |  0  |  0  |  1  |  1  |  0  |  1  |  0  |  0  |  1  |  1  |  1  |  0  |  1  |  0  |  0  |  1  |  4  
+Actor 3   |  0  |  1  |  1  |  0  |  1  |  0  |  1  |  1  |  0  |  0  |  0  |  0  |  1  |  1  |  1  |  0  |  0  |  0  |  0  |  0  |  5  
+Actor 4   |  0  |  0  |  0  |  0  |  0  |  0  |  0  |  0  |  0  |  1  |  1  |  1  |  1  |  0  |  0  |  0  |  0  |  0  |  0  |  0  |  5  
+Actor 5   |  0  |  1  |  0  |  0  |  0  |  0  |  1  |  1  |  0  |  0  |  0  |  1  |  0  |  1  |  0  |  0  |  0  |  1  |  1  |  1  |  5  
+Actor 6   |  0  |  0  |  0  |  0  |  0  |  0  |  0  |  0  |  0  |  0  |  0  |  0  |  0  |  1  |  1  |  1  |  1  |  1  |  0  |  0  |  40  
+Actor 7   |  0  |  0  |  0  |  0  |  1  |  0  |  1  |  1  |  0  |  0  |  0  |  0  |  0  |  0  |  1  |  0  |  0  |  0  |  0  |  0  |  4  
+Actor 8   |  0  |  0  |  0  |  0  |  0  |  1  |  1  |  1  |  1  |  0  |  0  |  0  |  0  |  0  |  0  |  0  |  0  |  0  |  0  |  0  |  20  
+---------------------------------------------------------------------------------------------------------------------------
+Duration  |  2  |  1  |  1  |  1  |  1  |  3  |  1  |  1  |  1  |  2  |  1  |  1  |  2  |  1  |  2  |  1  |  1  |  2  |  1  |  1  
+
 
 
 The problem below, <I>Film2</I>, is also based on real film data (although the costs are purely fictitious).  It is easier to solve than <I>Film1</I>.
 
 
-<TABLE>
-<TR><TD>Day     </TD><TD>   1 </TD><TD>  2 </TD><TD>  3 </TD><TD>  4 </TD><TD>  5 </TD><TD>  6 </TD><TD>  7 </TD><TD>  8 </TD><TD>  9 </TD><TD>  10 </TD><TD>  11 </TD><TD> 12 </TD><TD>  13</TD><TD >  Cost/100  </TD></TR>
-<TR><TD>Actor 1 </TD><TD>  0 </TD><TD>  0 </TD><TD> 1 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 1 </TD><TD> 1 </TD><TD> 1 </TD><TD> 1 </TD><TD> 0 </TD><TD> 40 </TD></TR>
-<TR><TD>Actor 2 </TD><TD>  1 </TD><TD> 1 </TD><TD> 0 </TD><TD> 0 </TD><TD> 1 </TD><TD> 1 </TD><TD> 1 </TD><TD> 1 </TD><TD> 1 </TD><TD> 1 </TD><TD> 1 </TD><TD> 0 </TD><TD> 1 </TD><TD> 20 </TD></TR>
-<TR><TD>Actor 3  </TD><TD> 0 </TD><TD> 1 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 1 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 20  </TD></TR>
-<TR><TD>Actor 4  </TD><TD> 1 </TD><TD> 0 </TD><TD> 0 </TD><TD> 1 </TD><TD> 1 </TD><TD> 1 </TD><TD> 1 </TD><TD> 1 </TD><TD> 1 </TD><TD> 1 </TD><TD> 0 </TD><TD> 0 </TD><TD> 1</TD><TD> 10 </TD></TR>
-<TR><TD>Actor 5  </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 1 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 1 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 5 </TD></TR>
-<TR><TD>Actor 6  </TD><TD> 1 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 1 </TD><TD> 1 </TD><TD> 0 </TD><TD> 1 </TD><TD> 1 </TD><TD> 1 </TD><TD> 1 </TD><TD> 0 </TD><TD> 10 </TD></TR>
-<TR><TD>Actor 7  </TD><TD> 0 </TD><TD> 1 </TD><TD> 0 </TD><TD> 0 </TD><TD> 1 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 1 </TD><TD> 1 </TD><TD> 1 </TD><TD> 0 </TD><TD> 0 </TD><TD> 5 </TD></TR>
-<TR><TD>Actor 8  </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 1 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 1 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0  </TD><TD> 4 </TD></TR>
-<TR><TD>Actor 9  </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 1 </TD><TD> 0 </TD><TD> 1 </TD><TD> 5 </TD></TR>
-<TR><TD>Actor 10 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 0 </TD><TD> 1 </TD><TD> 1 </TD><TD> 0 </TD><TD> 0 </TD><TD>  0 </TD><TD>  4 </TD></TR>
-<TR><TD>Duration   </TD><TD> 1 </TD><TD> 1 </TD><TD>  1 </TD><TD>  1 </TD><TD>  3 </TD><TD>  1 </TD><TD>  1 </TD><TD>  1 </TD><TD>  1 </TD><TD>  1 </TD><TD>  1 </TD><TD>  1 </TD><TD> 1</TD></TR>
-</TABLE>
+Day,1,2,3,4,5,6,7,8,9,10,11,12,13,Cost/100
+Actor 1,0,0,1,0,0,0,0,0,1,1,1,1,0,40
+Actor 2,1,1,0,0,1,1,1,1,1,1,1,0,1,20
+Actor 3,0,1,0,0,0,0,0,1,0,0,0,0,0,20
+Actor 4,1,0,0,1,1,1,1,1,1,1,0,0,1,10
+Actor 5,0,0,0,1,0,0,0,0,0,1,0,0,0,5
+Actor 6,1,0,0,0,0,1,1,0,1,1,1,1,0,10
+Actor 7,0,1,0,0,1,0,0,0,1,1,1,0,0,5
+Actor 8,0,0,0,0,0,1,0,0,0,1,0,0,0,4
+Actor 9,0,0,0,0,0,0,0,0,0,0,1,0,1,5
+Actor 10,0,0,0,0,0,0,0,0,1,1,0,0,0,4
+Duration,1,1,1,1,3,1,1,1,1,1,1,1,1,
+
 
