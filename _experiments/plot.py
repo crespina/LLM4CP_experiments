@@ -9,8 +9,6 @@ from sklearn.cluster import SpectralClustering
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
-import util
-from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 ### TODO : get rid of that by modifying the pickle loader

@@ -2,25 +2,20 @@ import json
 import os
 import re
 import time
-from llama_index.llms.ollama import Ollama
 from typing import Sequence
 from pydantic import BaseModel, Field
 from llama_index.core import Document
 from langchain_groq import ChatGroq
 from pathlib import Path
 from llama_index.core import ChatPromptTemplate
-from llama_index.core.llms import ChatMessage
 from llama_index.core import VectorStoreIndex
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.postprocessor.cohere_rerank import CohereRerank
 from llama_index.core import Settings
-import numpy as np
 import util
 import copy
 from llama_index.core.indices.query.schema import QueryBundle
 from llama_index.core.retrievers import BaseRetriever, VectorIndexRetriever
-import sys
-import cohere
 
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
 os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
