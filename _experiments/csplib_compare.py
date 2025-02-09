@@ -1,101 +1,75 @@
 import os
-import pickle
-from llama_index.llms.ollama import Ollama
-from typing import Sequence
-from llama_index.core import Document
 from langchain_groq import ChatGroq
-from llama_index.core import VectorStoreIndex
-from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 import util
-from llama_index.core.indices.query.schema import QueryBundle
-from llama_index.core.retrievers import BaseRetriever, VectorIndexRetriever
 from pydantic import BaseModel as PydanticBaseModel
-from pydantic import Field
+from llama_index.postprocessor.cohere_rerank import CohereRerank
+from llama_index.core import Settings, StorageContext, load_index_from_storage
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 
 os.environ["GROQ_API_KEY"] = "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"
-
-class BaseModel(PydanticBaseModel):
-    class Config:
-        arbitrary_types_allowed = True
+#os.environ["GROQ_API_KEY"] = "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"
 
 
-class TextDescription(BaseModel):
-    """A description in English of a problem represented by a MiniZinc model"""
+def load_index():
+    Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-base-en-v1.5")
 
-    name: str = Field(description="The name of the problem")
-    description: str = Field(description="A description of the problem")
-    variables: str = Field(
-        description="All the decision variables in mathematical notation, followed by an explanation of what they are in English"
+    Settings.show_progress = True
+
+    if os.path.exists("data/vector_dbs/selected_db"):
+        storage_context = StorageContext.from_defaults(
+            persist_dir="data/vector_dbs/selected_db"
+        )
+        index = load_index_from_storage(storage_context, show_progress=True)
+        print("Loaded index from storage.")
+        return index
+    else:
+        print("Index storage directory not found. Parse and store the index first.")
+        exit()
+
+
+def csplib_compare(llm):
+
+    csplib = {}
+    # Iterate over every file in the directory
+    for filename in os.listdir("data/csplib_corresp"):
+        if filename.endswith(".txt"):
+            # Get the file name without the '.txt' extension
+            key = filename[:-4]
+            file_path = os.path.join("data/csplib_corresp", filename)
+            # Open and read the file content
+            with open(file_path, "r", encoding="utf-8") as file:
+                csplib[key] = file.read()
+
+    index = load_index()
+    reranker = CohereRerank(api_key="STPahNFoWeYX4FSAoMx7NzHNgH2ejINXLDKIYOr4", top_n=5)
+
+    query_engine = index.as_query_engine(
+        llm=llm, similarity_top_k=10, node_postprocessors=[reranker]
     )
-    constraints: str = Field(
-        description="All the constraints in mathematical notation only"
-    )
-    objective: str = Field(
-        description="The objective of the problem (minimize or maximize what value)"
-    )
 
+    for name, descr in csplib.items():
+        if (name == "shpping" or name == "langford"):
 
-def embedding(instances):
+            response = query_engine.query(descr)
+            retrieved1 = response.source_nodes[0].metadata["model_name"]
+            retrieved2 = response.source_nodes[1].metadata["model_name"]
+            retrieved3 = response.source_nodes[2].metadata["model_name"]
+            retrieved4 = response.source_nodes[3].metadata["model_name"]
+            retrieved5 = response.source_nodes[4].metadata["model_name"]
 
-    for doc in instances.values():
-        if "embedding_vector" in doc.metadata.keys():
-            del doc.metadata["embedding_vector"]
+            print(name)
+            print("---------")
+            print(retrieved1,retrieved2,retrieved3,retrieved4, retrieved5)
+            print("---------")
+            print('\n')
+            print('\n')
 
-    embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-base-en-v1.5")
-    documents: Sequence[Document] = [content for content in instances.values()]
-
-    # Settings.chunk_size = 2048
-    vector_index = VectorStoreIndex.from_documents(documents, embed_model=embed_model)
-
-    vector_retriever = VectorIndexRetriever(
-        index=vector_index,
-        similarity_top_k=5,
-        embed_model=embed_model,
-    )
-
-    print("embedding done")
-    return vector_retriever
-
-
-def rank(query, vector_retriever, llm):
-
-    query_templated = QueryBundle(query)
-    retrieved_nodes = vector_retriever.retrieve(query_templated)
-    return retrieved_nodes
-
-
-def csplib_compare(instances, llm):
-
-    vector_retriever = embedding(instances)
-
-    with open("data\csplib_corresp\my_dict.pkl", "rb") as f:
-        cpslib = pickle.load(f)
-
-    for name, descr in cpslib.items():
-
-        response = rank(query=descr, vector_retriever=vector_retriever, llm=llm)
-        retrieved1 = response[0].metadata["model_name"]
-        retrieved2 = response[1].metadata["model_name"]
-        retrieved3 = response[2].metadata["model_name"]
-        retrieved4 = response[3].metadata["model_name"]
-        retrieved5 = response[4].metadata["model_name"]
-
-        print(name)
-        print("---------")
-        print(retrieved1,retrieved2,retrieved3,retrieved4, retrieved5)
-        print("---------")
-        print('\n')
-        print('\n')
-
-
-path = "data\model_checkpoints\llama32_90b_both_base_embedding.pkl"
-instances = util.load_instances(path)
 
 llm = ChatGroq(
-    model = "llama-3.3-70b-versatile",
+    model = "llama-3.3-70b-specdec",
     temperature=0,
     timeout=None,
     max_retries=2,
 )
 
-csplib_compare(instances=instances, llm=llm)
+csplib_compare(llm=llm)

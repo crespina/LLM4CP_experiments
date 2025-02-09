@@ -1,0 +1,13 @@
+This is a simple version of a network flow problem with three kinds of nodes: warehouses, transshipment points, and customers. Warehouses act like source nodes, while customers serve as sink nodes. Products are transferred from warehouses to customers via transshipment points. In more complex, real-life applications, these intermediate points allow for extra handling (packaging, splitting, consolidating) and/or a change of transportation mode. (See the Wikipedia article for some variations.)
+
+Problem parameters:
+
+Demand per customer (unit: number of products)
+Stock per warehouse (unit: number of products)
+Cost of moving one unit of product between a warehouse and a transshipment point
+Cost of moving one unit of product between a transshipment point and a customer
+Potential extensions:
+
+Multiple product types
+Lower/upper bounds on edge capacities
+This problem can be used as a benchmark either as an optimization problem (minimizing total cost) or as a satisfaction problem (with a given upper bound for total cost).
