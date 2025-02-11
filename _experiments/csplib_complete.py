@@ -19,7 +19,7 @@ def load_index():
     Settings.show_progress = True
 
     if os.path.exists("data/vector_dbs/csplib_inference"):
-        storage_context = StorageContext.from_defaults(persist_dir="data/vector_dbs/csplib_inference")
+        storage_context = StorageContext.from_defaults(persist_dir="data/vector_dbs/csplib_concat_models")
         index = load_index_from_storage(storage_context, show_progress=True)
         print("Loaded index from storage.")
         return index
@@ -30,7 +30,7 @@ def load_index():
 
 def replace(index_name, problem_data):
     for family_name, names in problem_data.items():
-        if index_name in names:
+        if index_name in names or index_name == family_name:
             return family_name, len(names)
     return None
 
@@ -93,54 +93,199 @@ def similary_description(index, spec, problem_data, avg=True):
 
     return similarity_matrix, xlabels, ylabels
 
+
+def similary_description_concat(index, spec, problem_data, avg=True):
+
+    generated_descriptions_embeds = {}
+    csplib_descriptions_embeds = {}
+
+    embedding_model = HuggingFaceEmbedding(model_name="BAAI/bge-base-en-v1.5")
+
+    for name, doc in spec.items():
+        csplib_descriptions_embeds[name] = embedding_model.get_text_embedding(doc)
+
+    for index_name, index_document in index.docstore.docs.items():
+        generated_descriptions_embeds[index_name] = embedding_model.get_text_embedding(index_document.text)
+
+    similarity_matrix = cosine_similarity(
+        np.array(list(generated_descriptions_embeds.values())),
+        np.array(list(csplib_descriptions_embeds.values())),
+    )
+
+    xlabels = list(csplib_descriptions_embeds.keys())
+    ylabels = list(generated_descriptions_embeds.keys())
+
+    return similarity_matrix, xlabels, ylabels
+
+
+def similary_description_concat_masked(index, txt_files):
+
+    generated_descriptions_embeds = {}
+    csplib_descriptions_embeds = {}
+
+    embedding_model = HuggingFaceEmbedding(model_name="BAAI/bge-base-en-v1.5")
+
+    for name, doc in txt_files.items():
+        csplib_descriptions_embeds[name] = embedding_model.get_text_embedding(doc)
+
+    for index_name, index_document in index.docstore.docs.items():
+        generated_descriptions_embeds[index_name] = embedding_model.get_text_embedding(
+            index_document.text
+        )
+
+    similarity_matrix = cosine_similarity(
+        np.array(list(generated_descriptions_embeds.values())),
+        np.array(list(csplib_descriptions_embeds.values())),
+    )
+
+    top_k = 5
+    top_generated_indices = np.argsort(similarity_matrix, axis=0)[-top_k:][::-1]  # Sort and take top 5
+
+
+    official_to_top_generated_with_scores = {
+        i: [(top_generated_indices[j, i], similarity_matrix[top_generated_indices[j, i], i])
+            for j in range(top_k)]
+        for i in range(similarity_matrix.shape[1])
+    }
+
+    print(official_to_top_generated_with_scores)
+
+    xlabels = list(csplib_descriptions_embeds.keys())
+    ylabels = list(generated_descriptions_embeds.keys())
+
+    return similarity_matrix, xlabels, ylabels
+
+
+def MRR_concat_descr(index, spec):
+
+    generated_descriptions_embeds = {}
+    csplib_descriptions_embeds = {}
+
+    embedding_model = HuggingFaceEmbedding(model_name="BAAI/bge-base-en-v1.5")
+
+    for name, doc in spec.items():
+        csplib_descriptions_embeds[name] = embedding_model.get_text_embedding(doc)
+
+    for index_name, index_document in index.docstore.docs.items():
+        generated_descriptions_embeds[index_name] = embedding_model.get_text_embedding(
+            index_document.text
+        )
+
+    similarity_matrix = cosine_similarity(
+        np.array(list(generated_descriptions_embeds.values())),
+        np.array(list(csplib_descriptions_embeds.values())),
+    )
+
+    top_k = 5
+    top_generated_indices = np.argsort(similarity_matrix, axis=0)[-top_k:][::-1] 
+
+    official_to_top_generated_with_scores = {
+        i: [(top_generated_indices[j, i], similarity_matrix[top_generated_indices[j, i], i])
+            for j in range(top_k)]
+        for i in range(similarity_matrix.shape[1])
+    }
+
+    print(official_to_top_generated_with_scores)
+
+    return official_to_top_generated_with_scores
+
+
 def model_output(index, model, reranker, problem_data, spec):
 
     query_engine = index.as_query_engine(llm= model,
                                                 similarity_top_k=10,
                                                 node_postprocessors=[reranker])
 
-    go = False
-
-    with open("_results/figures/csplib_all/classification/results.txt", "a") as f:  # Open file in append mode
+    with open("_results/figures/csplib_all/classification/concat/masked/results.txt", "a") as f:  # Open file in append mode
 
         for problem_name, problem_descr in tqdm(spec.items(), desc= "Generating Answers"):
-            if problem_name == "The_Rehearsal_Problem":
+            
+            response = query_engine.query(problem_descr)
+            family_name_1 = replace(response.source_nodes[0].metadata["model_name"], problem_data)
+            family_name_2 = replace(response.source_nodes[1].metadata["model_name"], problem_data)
+            family_name_3 = replace(response.source_nodes[2].metadata["model_name"], problem_data)
+            family_name_4 = replace(response.source_nodes[3].metadata["model_name"], problem_data)
+            family_name_5 = replace(response.source_nodes[4].metadata["model_name"], problem_data)
+
+            family_name_1 = family_name_1[0] if family_name_1 is not None else response.source_nodes[0].metadata["model_name"]
+            family_name_2 = family_name_2[0] if family_name_2 is not None else response.source_nodes[1].metadata["model_name"]
+            family_name_3 = family_name_3[0] if family_name_3 is not None else response.source_nodes[2].metadata["model_name"]
+            family_name_4 = family_name_4[0] if family_name_4 is not None else response.source_nodes[3].metadata["model_name"]
+            family_name_5 = family_name_5[0] if family_name_5 is not None else response.source_nodes[4].metadata["model_name"]
+
+            total = 0
+            correct1 = 0
+            correct2 = 0
+            correct3 = 0
+            correct4 = 0
+            correct5 = 0
+            incorrect = 0
+
+            if problem_name != family_name_1:
+                if problem_name != family_name_2:
+                    if problem_name != family_name_3:
+                        if problem_name != family_name_4:
+                            if problem_name != family_name_5:
+                                incorrect += 1
+                            else:
+                                correct5 += 1
+                        else:
+                            correct4 += 1
+                    else:
+                        correct3 += 1
+                else:
+                    correct2 += 1
+            else:
+                correct1 += 1
+
+            total += 1
+
+            print(
+                problem_name,
+                family_name_1,
+                family_name_2,
+                family_name_3,
+                family_name_4,
+                family_name_5,
+            )
+            f.write(
+                problem_name + " " + family_name_1 + " " + family_name_2 + " " + family_name_3 + " " + family_name_4 + " " + family_name_5 + "\n"
+            )
+
+        f.write(
+                "total = " + str(total) +
+                " correct1 = " + str(correct1) +
+                " correct2 = " + str(correct2) +
+                " correct3 = " + str(correct3) +
+                " correct4 = " + str(correct4) +
+                " correct5 = " + str(correct5) +
+                " incorrect " + str(incorrect) +
+                "\n",
+            )
+
+    return
+
+
+def model_output_masked(index, model, reranker, txt):
+
+    query_engine = index.as_query_engine(llm= model,
+                                                similarity_top_k=10,
+                                                node_postprocessors=[reranker])
+
+    go = False 
+    with open("_results/figures/csplib_all/classification/concat/masked/results.txt", "a") as f:  # Open file in append mode
+
+        for problem_name, problem_descr in tqdm(txt.items(), desc= "Generating Answers"):
+            if problem_name == "Vessel_Loading":
                 go = True
 
-            if go : 
+            if go :
                 response = query_engine.query(problem_descr)
-                family_name_1, _ = replace(response.source_nodes[0].metadata["model_name"], problem_data)
-                family_name_2, _ = replace(response.source_nodes[1].metadata["model_name"], problem_data)
-                family_name_3, _ = replace(response.source_nodes[2].metadata["model_name"], problem_data)
-                family_name_4, _ = replace(response.source_nodes[3].metadata["model_name"], problem_data)
-                family_name_5, _ = replace(response.source_nodes[4].metadata["model_name"], problem_data)
-
-                total = 0
-                correct1 = 0
-                correct2 = 0
-                correct3 = 0
-                correct4 = 0
-                correct5 = 0
-                incorrect = 0
-
-                if problem_name != family_name_1:
-                    if problem_name != family_name_2:
-                        if problem_name != family_name_3:
-                            if problem_name != family_name_4:
-                                if problem_name != family_name_5:
-                                    incorrect += 1
-                                else:
-                                    correct5 += 1
-                            else:
-                                correct4 += 1
-                        else:
-                            correct3 += 1
-                    else:
-                        correct2 += 1
-                else:
-                    correct1 += 1
-
-                total += 1
+                family_name_1 = response.source_nodes[0].metadata["model_name"]
+                family_name_2 = response.source_nodes[1].metadata["model_name"]
+                family_name_3 = response.source_nodes[2].metadata["model_name"]
+                family_name_4 = response.source_nodes[3].metadata["model_name"]
+                family_name_5 = response.source_nodes[4].metadata["model_name"]
 
                 print(
                     problem_name,
@@ -153,17 +298,6 @@ def model_output(index, model, reranker, problem_data, spec):
                 f.write(
                     problem_name + " " + family_name_1 + " " + family_name_2 + " " + family_name_3 + " " + family_name_4 + " " + family_name_5 + "\n"
                 )
-
-        f.write(
-                "total = " + str(total) +
-                " correct1 = " + str(correct1) +
-                " correct2 = " + str(correct2) +
-                " correct3 = " + str(correct3) +
-                " correct4 = " + str(correct4) +
-                " correct5 = " + str(correct5) +
-                " incorrect " + str(incorrect) +
-                "\n",
-            )
 
     return
 
@@ -211,7 +345,7 @@ def plot_sim_matrix(similarity_matrix, heatmap, x_labels, y_labels, title, save_
 def plot_model_output():
     # Data
     labels = ["First", "Second", "Third", "Fourth", "Fifth", "Incorrect"]
-    values = [30, 3, 2, 0, 0, 1]
+    values = [26, 3, 4, 0, 2, 1]
 
     # Plotting
     plt.figure(figsize=(8, 6))
@@ -220,7 +354,7 @@ def plot_model_output():
     plt.ylabel("Counts")
     plt.title("Identification of the problem : CSPLib problem descriptions")
     plt.savefig(
-        "_results/figures/csplib_all/classification/csplib_model_output.pdf",
+        "_results/figures/csplib_all/classification/concat/masked/csplib_model_output.pdf",
         format="pdf",
         bbox_inches="tight",
     )
@@ -228,10 +362,10 @@ def plot_model_output():
 
 
 def experiment():
-
+    """
     problem_data = {}
     specifications = {}
-
+    
     for problem in os.listdir("data/csplib"):
         problem_path = os.path.join("data/csplib", problem)
         if os.path.isdir(problem_path):
@@ -243,20 +377,36 @@ def experiment():
                     specifications[problem] = f.read()
 
             problem_data[problem] = mzn_files
+    
+    """
+    txt_dict = {}
+
+    for filename in os.listdir("data/csplib_masked"):
+        if filename.endswith(".txt"):
+            file_path = os.path.join("data/csplib_masked", filename)
+            with open(file_path, "r", encoding="utf-8") as file:
+                txt_dict[os.path.splitext(filename)[0]] = file.read()
 
     model = Groq(
-        model="llama3-70b-8192",
+        model="llama-3.3-70b-versatile",
         model_kwargs={"seed": 19851900},
         temperature=0.1,
     )
 
     index = load_index()
-    # similarity_matrix, x_labels, y_labels = similary_description(index=index, spec=specifications, problem_data=problem_data, avg=False)
-    # plot_sim_matrix(similarity_matrix, True, x_labels, y_labels, title= "Cosine Similarity Matrix : Maximum", save_name="_results/figures/csplib_all/descriptions_comparison/csm_max.pdf")
+    # similarity_matrix, x_labels, y_labels = similary_description_concat_masked(index=index, txt_files=txt_dict)
+    # plot_sim_matrix(
+    #   similarity_matrix,
+    #   True,
+    #   x_labels,
+    #   y_labels,
+    #   title="Cosine Similarity Matrix",
+    #   save_name="_results/figures/csplib_all/descriptions_comparison/concat/no_mask/csm.pdf",
+    # )
 
     reranker = CohereRerank(api_key="STPahNFoWeYX4FSAoMx7NzHNgH2ejINXLDKIYOr4", top_n=5)
-    # model_output(index, model, reranker, problem_data, specifications)
+    model_output_masked(index, model, reranker, txt=txt_dict)
     # plot_model_output()
 
-experiment()
+# experiment()
 plot_model_output()
