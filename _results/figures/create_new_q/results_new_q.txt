@@ -94,3 +94,4 @@ toomany toomany jobshop production_planning jobshop flattening
 toy_problem toy_problem toomany production_planning mip buggy
 buggy buggy jobshop rcpsp jobshop jobshop
 total = 95 correct1 = 85 correct2 = 7 correct3 = 1 correct4 = 1 correct5 = 1 incorrect 0
+MRR = 85 + 7/2 + 1/3 + 1/4 + 1/5 = 0.9398
