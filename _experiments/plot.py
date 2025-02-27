@@ -303,23 +303,85 @@ def barplot_families():
     4 : total = 95 correct1 = 73 correct2 = 7 correct3 = 3 correct4 = 1 correct5 = 0 incorrect 11
     5 : total = 95 correct1 = 29 correct2 = 12 correct3 = 4 correct4 = 7 correct5 = 2 incorrect 41
     new q : total = 95 correct1 = 85 correct2 = 7 correct3 = 1 correct4 = 1 correct5 = 1 incorrect 0
+    
+    descr : total = 36 correct1 = 27 correct2 = 3 correct3 = 1 correct4 = 1 correct5 = 2 incorrect 2
+    model : total = 36 correct1 = 23 correct2 = 3 correct3 = 1 correct4 = 3 correct5 = 0 incorrect 6
+    total : total = 36 correct1 = 26, correct2 = 3, correct3 = 4, correct4 = 0,  correct5 = 2, incorrect = 1
     """
     # Data
     labels = ["First", "Second", "Third", "Fourth", "Fifth", "Incorrect"]
-    values = [85, 7, 1, 1, 1, 0]
+    values = [26, 3, 4, 0, 2, 1]
 
     # Plotting
     plt.figure(figsize=(8, 6))
     plt.bar(labels, values, color=["green", "green", "green", "green", "green", "red"])
     plt.xlabel("Propositions")
     plt.ylabel("Counts")
-    plt.title("Identification of the problem : newly created question")
+    plt.title("Ablation study : model(s), descriptions and questions")
     plt.savefig(
-        "_results\\figures\create_new_q\\new_q.pdf",
+        "_results/figures/ablation/total/total.pdf",
         format="pdf",
         bbox_inches="tight",
     )
     plt.show()
+
+def plot_ablation():
+    data = {
+        "Model(s) only": {
+            "First": 23,
+            "Second": 3,
+            "Third": 1,
+            "Fourth": 3,
+            "Fifth": 0,
+            "Incorrect": 6,
+        },
+        "Model(s) and Description": {
+            "First": 27,
+            "Second": 3,
+            "Third": 1,
+            "Fourth": 1,
+            "Fifth": 2,
+            "Incorrect": 2,
+        },
+        "Whole pipeline": {
+            "First": 26,
+            "Second": 3,
+            "Third": 4,
+            "Fourth": 0,
+            "Fifth": 2,
+            "Incorrect": 1,
+        },
+    }
+
+    categories = [
+        "First",
+        "Second",
+        "Third",
+        "Fourth",
+        "Fifth",
+        "Incorrect",
+    ]
+    colors = ["green" if cat != "Incorrect" else "red" for cat in categories]
+
+    fig, axes = plt.subplots(1, 3, figsize=(12, 4), sharey=True)
+
+    for ax, (title, values) in zip(axes, data.items()):
+        ax.bar(categories, [values[cat] for cat in categories], color=colors)
+        ax.set_title(title)
+        ax.set_xlabel("Categories")
+        ax.set_ylabel("Count")
+        ax.set_xticklabels(categories)
+
+    plt.tight_layout()
+    plt.suptitle("Ablation Study", fontsize=16, fontweight="bold")
+    plt.subplots_adjust(top=0.85)
+    plt.savefig(
+        "_results/figures/ablation/study.pdf",
+        format="pdf",
+        bbox_inches="tight",
+    )
+    plt.show()
+
 
 # barplot_families()
 # cosine_confusion_matrix(save_name="llama32_90b_base_test_cosine_sim",labels=labels,sentences=sentences, heatmap=True)
@@ -331,4 +393,5 @@ def barplot_families():
 # hierarchical_clustering_plot("llama32_90b_both_base\llama32_90b_both_base_embedding_hierarchical_larger.pdf",embedding_vectors=embedding_dict,labels=labels)
 
 
-barplot_families()
+# barplot_families()
+plot_ablation()
