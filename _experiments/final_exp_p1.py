@@ -125,7 +125,7 @@ def experiment():
         model_kwargs={"seed": 19851900},
         temperature=0.1,
     )
-    index = load_index()
+
     reranker = CohereRerank(api_key="STPahNFoWeYX4FSAoMx7NzHNgH2ejINXLDKIYOr4", top_n=5)
 
     levels = ["expert", "medium", "beginner"]
@@ -136,19 +136,23 @@ def experiment():
     for level in levels :
         descr_folder = "data/generated_descriptions"
         descriptions = retrieve_descriptions(descr_folder, level)
-        for index in indexes : 
+        for index_level in indexes : 
             if level not in index:
-                result_path = "_results/txt/"+"index_"+index+"_level_"+level+".txt"
-                
+                index_path = "data/vector_dbs/mixed_db/" + index_level
+                index = load_index(index_path)
+                result_path = "_results/txt/"+"index_"+index_level+"_level_"+level+".txt"
+
                 directory = os.path.dirname(result_path)
                 if not os.path.exists(directory):
                     os.makedirs(directory)
 
                 ranking(index, model, reranker, descriptions, result_path)
                 mrr = compute_mrr(result_path)
-                mrr_dict[(level, index)] = mrr
+                mrr_dict[(level, index_level)] = mrr
 
     with open("_results/txt/exp1.txt", "a") as f:
         for key, value in mrr_dict.items():
             print(f"Level {key[0]}, Index {key[1]}: MRR = {value}")
             f.write(f"Level {key[0]}, Index {key[1]}: MRR = {value}")
+
+experiment()
