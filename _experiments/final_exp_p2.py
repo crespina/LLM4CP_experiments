@@ -178,24 +178,24 @@ def experiment():
     descriptions = retrieve_descriptions()
 
     #indexes = ["code", "expert", "medium", "beginner", "expertmedium", "expertbeginner","beginnermedium", "beginnermediumexpert"]
-    indexes = ["beginnermediumexpert"]
+    indexes = ["beginnermedium", "beginnerexpert", "mediumexpert","beginnermediumexpert"]
 
     for index_level in indexes :
 
         index_path = "data/vector_dbs/mixed_db/" + index_level
         index = load_index(index_path)
 
-        result_path = ("_results/txt/"+ "csplib/" + "index_"+ index_level+".txt")
+        result_path = ("_results/txt/"+ "exp2/" + "index_"+ index_level+".txt")
         ranking(index, model, reranker, descriptions, result_path)
 
         mrr = compute_mrr(result_path)
         print(index_level + " " +str(mrr))
 
-    """ with open("_results/txt/exp2.txt", "a") as f:
+    with open("_results/txt/exp2/exp2.txt", "a") as f:
         for index_level in indexes:
-            result_path = ("_results/txt/csplib/index_"+ index_level+ ".txt")
+            result_path = ("_results/txt/exp2/index_"+ index_level+ ".txt")
             mrr = compute_mrr(result_path)
             print(f"Index {index_level}, MRR = {mrr}")
-            f.write(f"Index {index_level}, MRR = {mrr}\n") """
+            f.write(f"Index {index_level}, MRR = {mrr}\n")
 
 experiment()
