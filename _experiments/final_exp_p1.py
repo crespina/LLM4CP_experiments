@@ -135,10 +135,8 @@ def experiment():
     reranker = CohereRerank(api_key="O1me5LM2LoiWxK0rgfQkqrQwjRKEpw8tHi12Efqf", top_n=5)
 
     levels = ["expert", "medium", "beginner"]
-    #indexes = ["code", "expert", "medium", "beginner", "expertmedium", "expertbeginner","beginnermedium"]
-    indexes = ["beginnermedium", "beginnerexpert","mediumexpert"]
-
-    """ 
+    indexes = ["code", "expert", "medium", "beginner", "expertmedium", "expertbeginner","beginnermedium"]
+    
     for level in levels :
         descr_folder = "data/generated_descriptions"
         descriptions = retrieve_descriptions(descr_folder, level)
@@ -148,7 +146,7 @@ def experiment():
                 index = load_index(index_path)
                 result_path = "_results/txt/exp1/"+"index_"+index_level+"_level_"+level+".txt"
 
-                ranking(index, model, reranker, descriptions, result_path) """
+                ranking(index, model, reranker, descriptions, result_path) 
 
     with open("_results/txt/exp1/exp1.txt", "a") as f:
         for level in levels: 
