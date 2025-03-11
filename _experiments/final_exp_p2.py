@@ -85,7 +85,7 @@ def retrieve_descriptions():
     return descriptions
 
 
-def ranking(index, model, reranker, descriptions, result_path):
+def ranking(index, model, reranker, descriptions, result_path, k=10):
     """
     Args
     -----------
@@ -103,7 +103,7 @@ def ranking(index, model, reranker, descriptions, result_path):
     model_tpm = 30_000
 
     query_engine = index.as_query_engine(
-        llm=model, similarity_top_k=10, node_postprocessors=[reranker]
+        llm=model, similarity_top_k=k, node_postprocessors=[reranker]
     )
 
     with open(result_path, "a") as f:  # Open file in append mode
@@ -173,27 +173,26 @@ def experiment():
         temperature=0,
     )
 
-    reranker = CohereRerank(api_key="O1me5LM2LoiWxK0rgfQkqrQwjRKEpw8tHi12Efqf", top_n=5)
+    reranker = CohereRerank(api_key="jp7UvuQSzgCpgyLPWuD2Debx1h6hyVhNmSU0aMK9", top_n=5)
 
     descriptions = retrieve_descriptions()
 
-    #indexes = ["code", "expert", "medium", "beginner", "expertmedium", "expertbeginner","beginnermedium", "beginnermediumexpert"]
-    indexes = ["beginnermedium", "beginnerexpert", "mediumexpert","beginnermediumexpert"]
-
+    indexes = ["code", "expert", "medium", "beginner", "beginnermedium", "beginnerexpert","mediumexpert", "beginnermediumexpert"]
+    
     for index_level in indexes :
 
         index_path = "data/vector_dbs/mixed_db/" + index_level
         index = load_index(index_path)
 
-        result_path = ("_results/txt/"+ "exp2/" + "index_"+ index_level+".txt")
-        ranking(index, model, reranker, descriptions, result_path)
+        result_path = ("_results/txt/"+ "exp2/k22/" + "index_"+ index_level+".txt")
+        ranking(index, model, reranker, descriptions, result_path, k=22)
 
         mrr = compute_mrr(result_path)
         print(index_level + " " +str(mrr))
-
-    with open("_results/txt/exp2/exp2.txt", "a") as f:
+    
+    with open("_results/txt/exp2/k22/exp2.txt", "a") as f:
         for index_level in indexes:
-            result_path = ("_results/txt/exp2/index_"+ index_level+ ".txt")
+            result_path = ("_results/txt/exp2/k22/index_"+ index_level+ ".txt")
             mrr = compute_mrr(result_path)
             print(f"Index {index_level}, MRR = {mrr}")
             f.write(f"Index {index_level}, MRR = {mrr}\n")

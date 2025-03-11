@@ -1,0 +1,12 @@
+Level expert, Index code, MRR = 0.6422885572139303
+Level expert, Index medium, MRR = 0.8606965174129353
+Level expert, Index beginner, MRR = 0.7139303482587065
+Level expert, Index beginnermedium, MRR = 0.8077114427860698
+Level medium, Index code, MRR = 0.5793532338308457
+Level medium, Index expert, MRR = 0.8567164179104477
+Level medium, Index beginner, MRR = 0.7171641791044776
+Level medium, Index beginnerexpert, MRR = 0.8624378109452737
+Level beginner, Index code, MRR = 0.740547263681592
+Level beginner, Index expert, MRR = 0.8557213930348259
+Level beginner, Index medium, MRR = 0.8731343283582089
+Level beginner, Index mediumexpert, MRR = 0.9019900497512439
