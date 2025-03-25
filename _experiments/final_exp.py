@@ -267,16 +267,21 @@ def experiment2():
         "beginnermediumexpert",
     ]
 
+    go = False
     for index_level in indexes:
 
-        index_path = "data/vector_dbs/mixed_db/" + index_level
-        index = load_index(index_path)
+        if index_level == "beginnermedium":
+            go = True
 
-        result_path = "_results/txt/" + "exp2/code_as_text_k22/" + "index_" + index_level + ".txt"
-        ranking(index, model, reranker, descriptions, result_path, k=22)
+        if go : 
+            index_path = "data/vector_dbs/code_as_text/" + index_level
+            index = load_index(index_path)
 
-        mrr = compute_mrr(result_path)
-        print(index_level + " " + str(mrr))
+            result_path = "_results/txt/" + "exp2/code_as_text_k22/" + "index_" + index_level + ".txt"
+            ranking(index, model, reranker, descriptions, result_path, k=22)
+
+            mrr = compute_mrr(result_path)
+            print(index_level + " " + str(mrr))
 
     with open("_results/txt/exp2/code_as_text_k22/exp2.txt", "a") as f:
         for index_level in indexes:
@@ -286,5 +291,5 @@ def experiment2():
             f.write(f"Index {index_level}, MRR = {mrr}\n")
 
 
-#experiment1()
+# experiment1()
 experiment2()
