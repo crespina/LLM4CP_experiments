@@ -5,6 +5,7 @@ from llama_index.core import Settings, StorageContext, load_index_from_storage
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.llms.groq import Groq
 from llama_index.postprocessor.cohere_rerank import CohereRerank
+from llama_index.postprocessor.colbert_rerank import ColbertRerank
 from llama_index.core.callbacks import TokenCountingHandler, CallbackManager
 
 from tqdm import tqdm
@@ -115,7 +116,7 @@ def ranking(index, model, reranker, descriptions, result_path, k=10):
     -----------
         index = BaseIndex from llama_index
         model = Groq LLM
-        reranker = CohereRerank
+        reranker = CohereRerank or ColBERT rerank
         descriptions = dict[str:str] containing one description per problem
         result_path = file to the txt file where the results will be appened
     """
@@ -187,7 +188,6 @@ def compute_mrr(result_path):
 
 
 def experiment1():
-    
 
     model = Groq(
         model="llama3-70b-8192",
@@ -195,7 +195,13 @@ def experiment1():
         temperature=0,
     )
 
-    reranker = CohereRerank(api_key="bk0m8vejhUPHMYwrtrBtL06juj0HDC0d3wGkSXOj", top_n=5)
+    reranker = ColbertRerank(
+        top_n=5,
+        model="colbert-ir/colbertv2.0",
+        tokenizer="colbert-ir/colbertv2.0",
+        keep_retrieval_score=True,
+    )
+    #reranker = CohereRerank(api_key="bk0m8vejhUPHMYwrtrBtL06juj0HDC0d3wGkSXOj", top_n=5)
 
     levels = ["expert", "medium", "beginner"]
     indexes = [
@@ -217,7 +223,7 @@ def experiment1():
                 index_path = "data/vector_dbs/code_as_text/" + index_level
                 index = load_index(index_path)
                 result_path = (
-                    "_results/txt/exp1/code_as_text_k22/"
+                    "_results/txt/exp1/colbert/"
                     + "index_"
                     + index_level
                     + "_level_"
@@ -227,12 +233,12 @@ def experiment1():
 
                 ranking(index, model, reranker, descriptions, result_path, k=22)
 
-    with open("_results/txt/exp1/code_as_text_k22/exp1.txt", "a") as f:
+    with open("_results/txt/exp1/colbert/exp1.txt", "a") as f:
         for level in levels:
             for index_level in indexes:
                 if level not in index_level:
                     result_path = (
-                        "_results/txt/exp1/code_as_text_k22/"
+                        "_results/txt/exp1/colbert/"
                         + "index_"
                         + index_level
                         + "_level_"
@@ -252,7 +258,13 @@ def experiment2():
         temperature=0,
     )
 
-    reranker = CohereRerank(api_key="vYogeYlPmCABXFf8PI5xMZmuH7UvTelIX56UMA8A", top_n=5)
+    reranker = ColbertRerank(
+        top_n=5,
+        model="colbert-ir/colbertv2.0",
+        tokenizer="colbert-ir/colbertv2.0",
+        keep_retrieval_score=True,
+    )
+    # reranker = CohereRerank(api_key="vYogeYlPmCABXFf8PI5xMZmuH7UvTelIX56UMA8A", top_n=5)
 
     descriptions = retrieve_descriptions_csplib()
 
@@ -267,29 +279,23 @@ def experiment2():
         "beginnermediumexpert",
     ]
 
-    go = False
     for index_level in indexes:
+        index_path = "data/vector_dbs/code_as_text/" + index_level
+        index = load_index(index_path)
 
-        if index_level == "beginnermedium":
-            go = True
+        result_path = "_results/txt/" + "exp2/colbert/" + "index_" + index_level + ".txt"
+        ranking(index, model, reranker, descriptions, result_path, k=22)
 
-        if go : 
-            index_path = "data/vector_dbs/code_as_text/" + index_level
-            index = load_index(index_path)
+        mrr = compute_mrr(result_path)
+        print(index_level + " " + str(mrr))
 
-            result_path = "_results/txt/" + "exp2/code_as_text_k22/" + "index_" + index_level + ".txt"
-            ranking(index, model, reranker, descriptions, result_path, k=22)
-
-            mrr = compute_mrr(result_path)
-            print(index_level + " " + str(mrr))
-
-    with open("_results/txt/exp2/code_as_text_k22/exp2.txt", "a") as f:
+    with open("_results/txt/exp2/colbert/exp2.txt", "a") as f:
         for index_level in indexes:
-            result_path = "_results/txt/exp2/code_as_text_k22/index_" + index_level + ".txt"
+            result_path = "_results/txt/exp2/colbert/index_" + index_level + ".txt"
             mrr = compute_mrr(result_path)
             print(f"Index {index_level}, MRR = {mrr}")
             f.write(f"Index {index_level}, MRR = {mrr}\n")
 
 
-# experiment1()
+experiment1()
 experiment2()
