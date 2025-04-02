@@ -97,9 +97,9 @@ def retrieve_descriptions_csplib():
 
     descriptions = {}
 
-    for filename in os.listdir("data/csplib_masked"):
+    for filename in os.listdir("data/csplib_descriptions_obfuscated"):
         if filename.endswith(".txt"):
-            file_path = os.path.join("data/csplib_masked", filename)
+            file_path = os.path.join("data/csplib_descriptions_obfuscated", filename)
             with open(file_path, "r", encoding="utf-8") as file:
                 name = os.path.splitext(filename)[0]
                 model_name = corresponding_name(name)

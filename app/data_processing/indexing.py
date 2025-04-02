@@ -10,7 +10,7 @@ from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.llms.groq import Groq
 from tqdm import tqdm
 
-from MnZcDescriptor.app.utils.data_utils import get_response_schema, problem_family
+from app.utils.data_utils import get_response_schema, problem_family
 
 
 class Storage:
@@ -73,7 +73,7 @@ class Storage:
         self.qa_model = Groq(model="llama-3.1-70b-versatile", api_key=args.groq_api_key,
                              model_kwargs={"seed": 42}, temperature=0.1)
 
-        self.embeddings_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
+        self.embeddings_model = HuggingFaceEmbedding(model_name="Alibaba-NLP/gte-modernbert-base")
 
         self.documents = []
         self.index = None

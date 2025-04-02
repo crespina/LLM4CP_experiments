@@ -1,8 +1,0 @@
-A Data Mining task involves partitioning a given set of objects into groups such that objects within the same group exhibit high similarity, while differing significantly from objects in other groups. This process relies on a dataset of objects and a dissimilarity measure between pairs. The goal is to optimize specific criteria that reflect group cohesion and separation, such as:  
-
-- Maximizing the minimal separation between groups, defined as the smallest dissimilarity between two objects belonging to different groups.  
-- Minimizing the maximal diameter of groups, where the diameter represents the largest dissimilarity between two objects within the same group.  
-- Minimizing the total sum of dissimilarities between objects within the same group.  
-- In a Euclidean context, minimizing the sum of squared distances between each object and the central point (centroid) of its assigned group.  
-
-User-defined knowledge can be incorporated into this task through constraints. These constraints may operate at the instance level, such as requiring specific pairs of objects to either belong to the same group (must-link) or be separated into different groups (cannot-link). Alternatively, constraints may apply to group properties like size, diameter, or density. While most optimization criteria for this task are computationally intractable (NP-Hard), the separation-based criterion is an exception and can be solved in polynomial time—though introducing user constraints renders even this variant NP-Hard.

@@ -8,7 +8,12 @@ ioannis.kostis@uclouvain.be | ioannis.aris.kostis@gmail.com
 Config object that handles the various parameters and configurations of the system.
 """
 
+import os
+
 import configargparse
+from dotenv import load_dotenv
+
+load_dotenv(dotenv_path='./app/assets/env/.env')
 
 
 def config_parser():
@@ -16,9 +21,6 @@ def config_parser():
         description="LLM 4 CP.")
     parser.add_argument('--config', is_config_file=True,
                         help='config file path')
-    parser.add_argument("--keys", is_config_file=True, required=False,
-                        help='Path to the API keys file.',
-                        default='./app/assets/.api_keys/keys.txt')
 
     # I/O params
     parser.add_argument('--mzn_path', type=str,
@@ -28,13 +30,12 @@ def config_parser():
                         default="./data/input/txt",
                         help='.txt directory input path.')
     parser.add_argument('--storage_dir', type=str,
-                        default='./data/vector_dbs/test_db',
+                        default='./data/vector_dbs/code_as_text/beginnermedium',
                         help='Vector DB directory path.')
 
     # API Keys
-    parser.add_argument('--llama_parse_key', type=str, help='Your LlamaParse token key (llx-<...>)')
-    parser.add_argument('--openai_api_key', type=str, help='Your OPENAI API token key (sk-<...>)')
-    parser.add_argument('--groq_api_key', type=str, help='Your Groq API token key gsk_<...>)')
-    parser.add_argument('--cohere_api_key', type=str, help='Your Cohere API token key <...>)')
-    
+    parser.add_argument('--groq_api_key', type=str,
+                        default=os.environ.get('GROQ_API_KEY'),
+                        help='Your Groq API token key gsk_<...>)')
+
     return parser
