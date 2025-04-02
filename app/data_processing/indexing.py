@@ -8,6 +8,7 @@ from llama_index.llms.groq import Groq
 from tqdm import tqdm
 
 from app.utils.app_utils import throttle_requests
+from app.utils.CONSTANTS import INDICES_EXP
 
 
 class Storage:
@@ -94,20 +95,19 @@ class Storage:
         self.model_tpm = 30_000
 
         # Document collections
-        self.expertise_levels = ["code_only", "expert", "medium", "beginner", "beginner_medium",
-                                 "beginner_expert", "medium_expert", "beginner_medium_expert"]
+        self.expertise_levels = INDICES_EXP
         self.docs_collections = {level: [] for level in self.expertise_levels}
 
         # Storage directories for indices
         self.storage_dirs = {
-            level: os.path.join(self.args.storage_dir, level.replace("_", ""))
+            level: os.path.join("./data/vector_dbs/code_as_text", level)
             for level in self.expertise_levels
         }
 
     @throttle_requests()
     def generate_descriptions(self):
         """Generate problem descriptions at different expertise levels"""
-        os.makedirs("data/generated_descriptions", exist_ok=True)
+        os.makedirs(self.args.descriptions_dir, exist_ok=True)
 
         for filename in tqdm(os.listdir(self.args.mixed_db_txt), desc="Generating descriptions"):
             file_path = os.path.join(self.args.mixed_db_txt, filename)
@@ -123,7 +123,7 @@ class Storage:
                         descriptions[level] = self.descriptor_model.complete(prompt=prompt).text
 
                     # Save descriptions to files
-                    output_folder = os.path.join("data/generated_descriptions", filename_stripped)
+                    output_folder = os.path.join(self.args.descriptions_dir, filename_stripped)
                     os.makedirs(output_folder, exist_ok=True)
 
                     for level, description in descriptions.items():
@@ -159,7 +159,7 @@ class Storage:
         source_code = files["source_code"]
 
         # Create code-only document
-        self.docs_collections["code_only"].append(
+        self.docs_collections["code"].append(
             Document(
                 text=source_code,
                 metadata={"model_name": base_name},

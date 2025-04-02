@@ -10,16 +10,12 @@ def main():
 
     # Run Experiment 1
     print("Running Experiment 1...")
-    exp1 = Experiment1(
-        args=args,
-    )
+    exp1 = Experiment1(args=args)
     exp1.run()
 
     # Run Experiment 2
     print("\nRunning Experiment 2...")
-    exp2 = Experiment2(
-        args=args,
-    )
+    exp2 = Experiment2(args=args)
     exp2.run()
 
 

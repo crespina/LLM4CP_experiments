@@ -12,9 +12,20 @@ if __name__ == "__main__":
     parser = config_parser()
     args = parser.parse_args()
 
+    # args.storage_dir = "./data/vector_dbs/code_as_text/medium"
+
     agent = Inference(args=args)
-    query = get_input_safely("Question: ")
+    print("Constraint Programming Question Answering System")
+    print("Ask questions about constraint programming algorithms and problems.")
+    print("You can enter multiline questions.\nPress Enter twice to submit your question.")
+    print("Type 'quit' to exit the program.")
+    
     while True:
+        query = get_input_safely("Question: ")
+        if query.strip().lower() == "quit":
+            print("Exiting program.")
+            break
+            
         response, user_query = agent.query_llm(question=query)
-        pprint_ranking(response=response, question=user_query, query=query)
-        query = get_input_safely("\nQuestion: ")
+        pprint_ranking(response=response)
+        print("\n")

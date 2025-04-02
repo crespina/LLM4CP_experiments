@@ -5,10 +5,10 @@ from app.utils.exp_utils import retrieve_descriptions, compute_mrr
 
 
 class Experiment1(Experiment):
-    def __init__(self, args, descr_folder="data/generated_descriptions"):
+    def __init__(self, args):
         super().__init__(args)
-        self.descr_folder = descr_folder
-        self.output_dir = f"{args.output_dir}/exp1"
+        self.descr_folder = args.descriptions_dir
+        self.results_dir = f"{args.results_dir}/exp1"
 
         self.args = args
 
@@ -35,7 +35,7 @@ class Experiment1(Experiment):
                     self.args.storage_dir = f"data/vector_dbs/code_as_text/{index_level}"
                     index = load_index(self.args)
 
-                    result_path = f"{self.output_dir}/index_{index_level}_level_{level}.txt"
+                    result_path = f"{self.results_dir}/index_{index_level}_level_{level}.txt"
                     rankings = self.ranking(index, descriptions, result_path, k=5)
 
                     # Calculate MRR directly from rankings
@@ -50,5 +50,5 @@ class Experiment1(Experiment):
                     self.cache.save_cache(self.experiment_name, "processed_combinations", processed_combinations)
 
         # Save all results
-        self.save_results(results, f"{self.output_dir}/exp1.txt")
+        self.save_results(results, f"{self.results_dir}/exp1.txt")
         return results

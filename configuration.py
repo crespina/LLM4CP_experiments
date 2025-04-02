@@ -1,10 +1,4 @@
 """
-Augustin CRESPIN
-augustin.crespin@student.uclouvain.be | crespin.augustin@gmail.com
-
-Ioannis KOSTIS
-ioannis.kostis@uclouvain.be | ioannis.aris.kostis@gmail.com
-
 Config object that handles the various parameters and configurations of the system.
 """
 
@@ -23,22 +17,24 @@ def config_parser():
                         help='config file path')
 
     # I/O params
-    parser.add_argument('--mzn_path', type=str,
-                        default="./data/input/mzn",
-                        help='.mzn directory input path.')
-    parser.add_argument('--txt_path', type=str,
-                        default="./data/input/txt",
+    parser.add_argument('--mixed_db_txt', type=str,
+                        default="./data/input/merged_mzn_source_code",
                         help='.txt directory input path.')
+
     parser.add_argument('--storage_dir', type=str,
-                        default='./data/vector_dbs/code_as_text/beginnermedium',
+                        default='./data/vector_dbs/code_as_text/medium',
                         help='Vector DB directory path.')
 
     parser.add_argument('--output_dir', type=str,
                         default='./data/output',
                         help='Output directory path.')
 
+    parser.add_argument('--results_dir', type=str,
+                        default='./data/results',
+                        help='Results directory path.')
+
     parser.add_argument("--descriptions_dir", type=str,
-                        default="data/generated_descriptions",
+                        default="data/output/generated_descriptions",
                         help="path of the folder containing the generated descriptions")
 
     parser.add_argument("--cache_dir", type=str,
