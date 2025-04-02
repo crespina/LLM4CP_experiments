@@ -1,3 +1,15 @@
+_experiments
+ ---- final_exp.py
+app
+ ---- data_processing
+    ---- data_loaders.py
+    ---- indexing.py
+ ---- inference
+    ---- inference.py
+ ---- utils
+    ---- app_utils.py
+    ---- CONSTANTS.py
+    ---- data_utils.py
 data
  ---- input
     ---- csplib
@@ -29,3 +41,7 @@ data
                 The exp2.txt file contains the final result in terms of MRR (i.e. the MRR is computed using all the results from the other files).
  ---- vector_dbs/code_as_text : 
     This folder contains several subfolders (beginner, beginnerexpert,  beginnermedium, beginnermediumexpert, code, expert, medium, mediumexpert), each containing a vector store index (saved using the persist function). The name of the subfolder represent what level of documents are contained in the index. 
+configuration.py
+requirements.txt
+run_indexing.py
+run_inference.py
