@@ -1,11 +1,9 @@
-import os
 import sys
 import time
 from functools import wraps
 
 
 def pprint_ranking(response):
-
     print("Ranking:")
     for ind, source_node in enumerate(response.source_nodes):
         print(f"Rank {ind + 1}:")
@@ -22,7 +20,7 @@ def get_input_safely(prompt):
     print(prompt, end='', flush=True)
 
     lines = []
-    
+
     if sys.stdin.isatty():
         # Interactive terminal mode
         while True:
@@ -37,9 +35,9 @@ def get_input_safely(prompt):
             if line.strip() == "":
                 break
             lines.append(line)
-    
+
     user_input = '\n'.join(lines)
-    
+
     return user_input
 
 
@@ -67,33 +65,3 @@ def throttle_requests():
         return wrapper
 
     return decorator
-
-
-def throttle_cross_query_requests(func):
-    """
-    Decorator to throttle cross-query requests.
-    To be used in app.scripts.Demo.Demo.run() if you run into an issue with the API's rate limiters.
-
-    Args:
-        func (function): Function to wrap.
-
-    Returns:
-        function: Wrapped function with throttling.
-    """
-
-    def wrapper(self, *args, **kwargs):
-        start_time = time.time()
-        result = func(self, *args, **kwargs)
-        elapsed_time = time.time() - start_time
-        remainder = elapsed_time % 60
-        sleep_time = 60 - remainder
-        if sleep_time > 0:
-            for remaining in range(int(sleep_time), 0, -1):
-                sys.stdout.write("\r")
-                sys.stdout.write(f"Waiting for {remaining} seconds...")
-                sys.stdout.flush()
-                time.sleep(1)
-        return result
-
-    return wrapper
-
