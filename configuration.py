@@ -33,6 +33,18 @@ def config_parser():
                         default='./data/vector_dbs/code_as_text/beginnermedium',
                         help='Vector DB directory path.')
 
+    parser.add_argument('--output_dir', type=str,
+                        default='./data/output',
+                        help='Output directory path.')
+
+    parser.add_argument("--descriptions_dir", type=str,
+                        default="data/generated_descriptions",
+                        help="path of the folder containing the generated descriptions")
+
+    parser.add_argument("--cache_dir", type=str,
+                        default="data/cache",
+                        help="path of the folder containing the cache files")
+
     # API Keys
     parser.add_argument('--groq_api_key', type=str,
                         default=os.environ.get('GROQ_API_KEY'),

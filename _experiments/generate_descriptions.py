@@ -1,15 +1,16 @@
 import os
 
 from llama_index.core import PromptTemplate
+from llama_index.core import Settings
+from llama_index.core.callbacks import TokenCountingHandler, CallbackManager
 from llama_index.llms.groq import Groq
 from tqdm import tqdm
 
-from app.utils.throttle import throttle_requests
-from llama_index.core.callbacks import TokenCountingHandler, CallbackManager
-from llama_index.core import Settings
+from app.utils.app_utils import throttle_requests
 
-class Description_Generator:
-    def __init__(self,args):
+
+class DescriptionGenerator:
+    def __init__(self, args):
 
         self.args = args
 
@@ -32,7 +33,7 @@ class Description_Generator:
             "explanation of what they are in English\n"
             "objective: The objective of the problem (minimize or maximize what value)\n"
             "In your answer, do not include any introductory phrases (such as 'Here is the explanation of the problem')"
-            
+
         )
 
         self.template_description_level_medium = PromptTemplate(

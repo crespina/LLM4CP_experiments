@@ -10,7 +10,8 @@ class VectorStoresConstructor:
 
         self.args = args
 
-        self.embeddings_model = HuggingFaceEmbedding(model_name="Alibaba-NLP/gte-modernbert-base", trust_remote_code=True)
+        self.embeddings_model = HuggingFaceEmbedding(model_name="Alibaba-NLP/gte-modernbert-base",
+                                                     trust_remote_code=True)
 
         self.docs_code_only = []
         self.docs_expert = []
@@ -43,8 +44,8 @@ class VectorStoresConstructor:
 
         Settings.chunk_size = 4096
 
-        for folder_name in os.listdir(self.args.descriptions_folder):
-            folder_path = os.path.join(self.args.descriptions_folder, folder_name)
+        for folder_name in os.listdir(self.args.descriptions_dir):
+            folder_path = os.path.join(self.args.descriptions_dir, folder_name)
             if os.path.isdir(folder_path):
 
                 expert_path = os.path.join(folder_path, "expert.txt")

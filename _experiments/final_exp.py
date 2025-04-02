@@ -12,7 +12,7 @@ from app.utils.CONSTANTS import CORRESPONDENCES, LEVELS, INDICES, INDICES_EXP
 
 def retrieve_descriptions(descr_folder, level):
     """
-    create the dictionnary containing the name of the problem as the key
+    create the dictionary containing the name of the problem as the key
     and the description for the level in args as value
     """
 
@@ -121,8 +121,8 @@ def compute_mrr(result_path):
 
             total += 1
 
-    MRR = sum(reciprocal_ranks) / total
-    return MRR
+    mrr = sum(reciprocal_ranks) / total
+    return mrr
 
 
 def experiment1():
@@ -167,14 +167,14 @@ def experiment1():
                     f.write(f"Level {level}, Index {index_level}, MRR = {mrr}\n")
 
 
-def experiment2():
+def experiment2(csplib_desc_dir_path):
     model = Groq(
         model="llama3-70b-8192",
         model_kwargs={"seed": 19851900},
         temperature=0,
     )
 
-    descriptions = retrieve_descriptions_csplib()
+    descriptions = retrieve_descriptions_csplib(csplib_desc_dir_path)
 
     for index_level in INDICES_EXP:
         index_path = "data/vector_dbs/code_as_text/" + index_level
@@ -195,4 +195,4 @@ def experiment2():
 
 
 experiment1()
-experiment2()
+experiment2(csplib_desc_dir_path = "data/output/generated_descriptions")

@@ -1,4 +1,4 @@
-from app.data_processing.generate_vector_stores import VectorStoresConstructor
+from _experiments.generate_vector_stores import VectorStoresConstructor
 from configuration import config_parser
 
 if __name__ == "__main__":
