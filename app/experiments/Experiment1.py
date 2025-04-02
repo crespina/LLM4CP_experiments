@@ -17,7 +17,7 @@ class Experiment1(Experiment):
         # Load cached results if available
         results = self.cache.load_cache(self.experiment_name, "results", default={})
         
-        # Load processed combinations to avoid recomputation
+        # Load processed combinations to avoid re-computation
         processed_combinations = self.cache.load_cache(
             self.experiment_name, "processed_combinations", default=set()
         )

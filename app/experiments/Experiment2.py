@@ -17,7 +17,7 @@ class Experiment2(Experiment):
         # Load cached results if available
         results = self.cache.load_cache(self.experiment_name, "results", default={})
 
-        # Load processed indices to avoid recomputation
+        # Load processed indices to avoid re-computation
         processed_indices = self.cache.load_cache(
             self.experiment_name, "processed_indices", default=set()
         )
