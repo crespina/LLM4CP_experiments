@@ -1,71 +1,13 @@
 import os
 import time
 
-from llama_index.core import Settings, StorageContext, load_index_from_storage
-from llama_index.embeddings.huggingface import HuggingFaceEmbedding
-from llama_index.llms.groq import Groq
+from llama_index.core import Settings
 from llama_index.core.callbacks import TokenCountingHandler, CallbackManager
-
+from llama_index.llms.groq import Groq
 from tqdm import tqdm
 
-
-os.environ["GROQ_API_KEY"] = "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"
-
-
-corresp = {
-    "All-Interval_Series": "all_interval",
-    "Balanced_Academic_Curriculum_Problem__BACP_": "curriculum",
-    "Balanced_Incomplete_Block_Designs": "bibd",
-    "Bus_Driver_Scheduling": "bus_scheduling_csplib",
-    "Car_Sequencing": "car",
-    "Crossfigures": "crossfigure",
-    "Diamond-free_Degree_Sequences": "diamond_free_degree_sequence",
-    "Golomb_rulers": "golomb",
-    "Graceful_Graphs": "graph",
-    "Killer_Sudoku": "killer_sudoku",
-    "Langford_s_number_problem": "langford",
-    "Magic_Hexagon": "magic_hexagon",
-    "Magic_Squares_and_Sequences": "magic_sequence",
-    "Maximum_Clique": "clique",
-    "Maximum_density_still_life": "maximum_density_still_life",
-    "N-Queens": "queens",
-    "Nonogram": "nonogram_create_automaton2",
-    "Number_Partitioning": "partition",
-    "Optimal_Financial_Portfolio_Design": "opd",
-    "Quasigroup_Completion": "QuasigroupCompletion",
-    "Quasigroup_Existence": "QuasiGroupExistence",
-    "Rotating_Rostering_Problem": "RosteringProblem",
-    "Schur_s_Lemma": "schur",
-    "Social_Golfers_Problem": "golfers",
-    "Solitaire_Battleships": "sb",
-    "Steiner_triple_systems": "steiner",
-    "Stochastic_Assignment_and_Scheduling_Problem": "stoch_fjsp",
-    "Synchronous_Optical_Networking__SONET__Problem": "sonet_problem",
-    "Template_Design": "template_design",
-    "The_n-Fractions_Puzzle": "fractions",
-    "The_Rehearsal_Problem": "rehearsal",
-    "Traffic_Lights": "traffic_lights_table",
-    "Traveling_Tournament_Problem_with_Predefined_Venues__TTPPV_": "TTPPV",
-    "Vessel_Loading": "vessel-loading",
-    "Warehouse_Location_Problem": "warehouses",
-    "Water_Bucket_Problem": "water_buckets1",
-}
-
-def load_index(index_path):
-    Settings.embed_model = HuggingFaceEmbedding(model_name="Alibaba-NLP/gte-modernbert-base")
-
-    Settings.show_progress = True
-
-    if os.path.exists(index_path):
-        storage_context = StorageContext.from_defaults(
-            persist_dir=index_path
-        )
-        index = load_index_from_storage(storage_context, show_progress=True)
-        print("Loaded index from storage.")
-        return index
-    else:
-        print("Index storage directory not found. Parse and store the index first.")
-        exit()
+from app.data_processing.data_loaders import load_index
+from app.utils.CONSTANTS import CORRESPONDENCES, LEVELS, INDICES, INDICES_EXP
 
 
 def retrieve_descriptions(descr_folder, level):
@@ -74,32 +16,30 @@ def retrieve_descriptions(descr_folder, level):
     and the description for the level in args as value
     """
 
-    dict = {}
+    descriptions = {}
     for folder_name in os.listdir(descr_folder):
         folder_path = os.path.join(descr_folder, folder_name)
         if os.path.isdir(folder_path):
-
-            path = os.path.join(folder_path, level+".txt")
+            path = os.path.join(folder_path, level + ".txt")
 
             with open(path, "r", encoding="utf-8") as f:
                 text_description = f.read()
-            dict[folder_name] = text_description
-    return dict
+            descriptions[folder_name] = text_description
+    return descriptions
 
 
-def retrieve_descriptions_csplib():
-
+def retrieve_descriptions_csplib(desc_dir_path):
     def corresponding_name(problem_name):
-        if problem_name not in corresp:
+        if problem_name not in CORRESPONDENCES:
             print("error " + problem_name)
-        model_name = corresp[problem_name]
+        model_name = CORRESPONDENCES[problem_name]
         return model_name
 
     descriptions = {}
 
-    for filename in os.listdir("data/csplib_descriptions_obfuscated"):
+    for filename in os.listdir(desc_dir_path):
         if filename.endswith(".txt"):
-            file_path = os.path.join("data/csplib_descriptions_obfuscated", filename)
+            file_path = os.path.join(desc_dir_path, filename)
             with open(file_path, "r", encoding="utf-8") as file:
                 name = os.path.splitext(filename)[0]
                 model_name = corresponding_name(name)
@@ -164,6 +104,7 @@ def ranking(index, model, descriptions, result_path, k=10):
 
     return
 
+
 def compute_mrr(result_path):
     reciprocal_ranks = []
     total = 0
@@ -185,54 +126,41 @@ def compute_mrr(result_path):
 
 
 def experiment1():
-
     model = Groq(
         model="llama3-70b-8192",
         model_kwargs={"seed": 19851900},
         temperature=0,
     )
 
-    levels = ["expert", "medium", "beginner"]
-    indexes = [
-        "code",
-        "expert",
-        "medium",
-        "beginner",
-        "mediumexpert",
-        "beginnerexpert",
-        "beginnermedium",
-    ]
-
-    for level in levels:
+    for level in LEVELS:
         descr_folder = "data/generated_descriptions"
         descriptions = retrieve_descriptions(descr_folder, level)
-        for index_level in indexes:
+        for index_level in INDICES:
             if level not in index_level:
-
                 index_path = "data/vector_dbs/code_as_text/" + index_level
                 index = load_index(index_path)
                 result_path = (
-                    "_results/txt/exp1/no_rerank/"
-                    + "index_"
-                    + index_level
-                    + "_level_"
-                    + level
-                    + ".txt"
-                )
-
-                ranking(index, model, descriptions, result_path, k=5)
-
-    with open("_results/txt/exp1/no_rerank/exp1.txt", "a") as f:
-        for level in levels:
-            for index_level in indexes:
-                if level not in index_level:
-                    result_path = (
                         "_results/txt/exp1/no_rerank/"
                         + "index_"
                         + index_level
                         + "_level_"
                         + level
                         + ".txt"
+                )
+
+                ranking(index, model, descriptions, result_path, k=5)
+
+    with open("_results/txt/exp1/no_rerank/exp1.txt", "a") as f:
+        for level in LEVELS:
+            for index_level in INDICES:
+                if level not in index_level:
+                    result_path = (
+                            "_results/txt/exp1/no_rerank/"
+                            + "index_"
+                            + index_level
+                            + "_level_"
+                            + level
+                            + ".txt"
                     )
                     mrr = compute_mrr(result_path)
                     print(f"Level {level}, Index {index_level}, MRR = {mrr}")
@@ -240,7 +168,6 @@ def experiment1():
 
 
 def experiment2():
-
     model = Groq(
         model="llama3-70b-8192",
         model_kwargs={"seed": 19851900},
@@ -249,18 +176,7 @@ def experiment2():
 
     descriptions = retrieve_descriptions_csplib()
 
-    indexes = [
-        "code",
-        "expert",
-        "medium",
-        "beginner",
-        "beginnermedium",
-        "beginnerexpert",
-        "mediumexpert",
-        "beginnermediumexpert",
-    ]
-
-    for index_level in indexes:
+    for index_level in INDICES_EXP:
         index_path = "data/vector_dbs/code_as_text/" + index_level
         index = load_index(index_path)
 
@@ -271,7 +187,7 @@ def experiment2():
         print(index_level + " " + str(mrr))
 
     with open("_results/txt/exp2/no_rerank/exp2.txt", "a") as f:
-        for index_level in indexes:
+        for index_level in INDICES_EXP:
             result_path = "_results/txt/exp2/no_rerank/index_" + index_level + ".txt"
             mrr = compute_mrr(result_path)
             print(f"Index {index_level}, MRR = {mrr}")
