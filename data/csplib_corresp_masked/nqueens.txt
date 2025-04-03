@@ -1,9 +1,0 @@
-Can you place queens on an n×n chessboard such that none of them attack each other?
-
-In chess, a queen attacks along its row, column, and both diagonals. The challenge here is to choose n locations on an n×n board so that no two queens share the same row, column, or diagonal.
-
-A neat arithmetic insight helps model the situation. Represent a queen by an ordered pair (α, β) where α is the column and β is the row. Two queens don’t attack each other if they have different values for all of α, β, α−β, and α+β. While it might seem odd at first, moving one square along one diagonal leaves the sum (α+β) unchanged, and along the other diagonal, the difference (α−β) stays the same.
-
-The puzzle also features inherent symmetry. Any solution can be transformed into another valid one by applying any of the eight symmetries of the chessboard (rotations by 90° and reflections, for example).
-
-This puzzle is widely studied in the mathematical literature. A notable survey from 2009 by Bell & Stevens offers an in-depth look.

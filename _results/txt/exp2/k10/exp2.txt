@@ -1,8 +1,0 @@
-Index code, MRR = 0.6986111111111111
-Index beginner, MRR = 0.7939814814814814
-Index medium, MRR = 0.7662037037037037
-Index expert, MRR = 0.7569444444444443
-Index beginnermedium, MRR = 0.824074074074074
-Index beginnerexpert, MRR = 0.7800925925925926
-Index mediumexpert, MRR = 0.7800925925925926
-Index beginnermediumexpert, MRR = 0.7949074074074073

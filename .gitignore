@@ -61,3 +61,6 @@ docs/_build/
 # Vscode debug
 
 .vscode/
+/data/results/exp1/.backup/
+/data/results/exp2/.backup/
+/_experiments/
