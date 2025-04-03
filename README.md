@@ -86,9 +86,9 @@ The indices will be saved in the `./data/vector_dbs/code_as_text/` directory wit
 expertise level.
 
 >[!TIP]
-> Augustin, write here what to do to add new algorithms
-> this is a new lne
-> this is another.
+> To add a new MiniZinc model into the database, all you need to do is to create a <the name of the problem>.txt file, containing the MiniZinc implementation into the data/input/merged_mzn_source_code folder. 
+> Once this is done, simply rerun the indexing (i.e. run the run_indexing.py file). This will create a new set of vector stores in the data/vector_dbs folder.
+> These new vector stores will be used the next time you run the inference (i.e. running the run_inference.py file)
 
 ### Experiments
 
