@@ -1,48 +1,7 @@
-import os
-
-from langchain.output_parsers import ResponseSchema
 from tqdm import tqdm
 from transformers import AutoTokenizer
 
 from app.data_processing.data_loaders import load_index
-from app.utils.CONSTANTS import FAMILIES
-
-
-def convert_mzn_to_txt(mzn_path, txt_path):
-    for dir_path, _, filenames in os.walk(mzn_path):
-        for filename in tqdm(filenames, desc="Converting .mzn to .txt"):
-            if filename.endswith(".mzn"):
-                mzn_file_path = os.path.join(dir_path, filename)
-                with open(mzn_file_path, 'r') as mzn_file:
-                    content = mzn_file.read()
-
-                relative_path = os.path.relpath(dir_path, mzn_path)
-                output_dir_path = os.path.join(txt_path, relative_path)
-
-                os.makedirs(output_dir_path, exist_ok=True)
-
-                txt_file_path = os.path.join(output_dir_path, filename.replace('.mzn', '.txt'))
-
-                with open(txt_file_path, 'w') as txt_file:
-                    txt_file.write(content)
-
-
-def get_response_schema(query_config_dict):
-    response_schema = []
-    for field, description in query_config_dict.items():
-        response_schema.append(ResponseSchema(name=field.strip(), description=description.strip()))
-    return response_schema
-
-
-def problem_family(problem_name):
-    # Given the name of the problem, returns its family
-
-    for family_name, problems in FAMILIES.items():
-        for problem in problems:
-            if problem == problem_name:
-                problem_name = problem_name.replace(problem, family_name)
-
-    return problem_name
 
 
 def count_tokens(model_name, args):

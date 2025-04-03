@@ -85,6 +85,11 @@ This script performs two main operations:
 The indices will be saved in the `./data/vector_dbs/code_as_text/` directory with separate subdirectories for each
 expertise level.
 
+>[!TIP]
+> Augustin, write here what to do to add new algorithms
+> this is a new lne
+> this is another.
+
 ### Experiments
 
 To run the experiments described in the paper, execute the experiments script:
