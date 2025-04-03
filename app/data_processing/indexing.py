@@ -154,6 +154,43 @@ class Storage:
         # Create and persist vector indices
         self.create_and_persist_indices()
 
+    def create_documents_without_code(self, base_name, files):
+        """Create different document combinations for indexing without source code"""
+        
+        # Create single expertise level documents
+        for level in ["beginner", "medium", "expert"]:
+            self.docs_collections[level].append(
+                Document(
+                    text=files[level],
+                    metadata={"model_name": base_name},
+                    id_=f"{base_name}_{level}",
+                )
+            )
+
+        # Create combined expertise documents
+        combinations = [
+            ("beginner_medium", ["beginner", "medium"]),
+            ("beginner_expert", ["beginner", "expert"]),
+            ("medium_expert", ["medium", "expert"]),
+            ("beginner_medium_expert", ["beginner", "medium", "expert"])
+        ]
+
+        for combo_name, levels in combinations:
+            text_parts = []
+
+            for i, level in enumerate(levels, 1):
+                text_parts.append(f"Description {i}:\n------\n{files[level]}")
+
+            combined_text = "\n======\n".join(text_parts)
+
+            self.docs_collections[combo_name].append(
+                Document(
+                    text=combined_text,
+                    metadata={"model_name": base_name},
+                    id_=f"{base_name}_{combo_name}",
+                )
+            )
+
     def create_documents(self, base_name, files):
         """Create different document combinations for indexing"""
         source_code = files["source_code"]
@@ -231,3 +268,5 @@ class Storage:
 
         # Step 2: Create vector stores from the generated descriptions
         self.create_vector_stores()
+        #self.create_documents_without_code() #uncomment this to generate the embedding DBs without the source code
+
